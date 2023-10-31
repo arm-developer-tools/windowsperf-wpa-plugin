@@ -36,7 +36,7 @@ using System.Threading;
 using WperfWPAPlugin.Constants;
 using WperfWPAPlugin.Events;
 
-namespace WperfWPAPlugin
+namespace WPAPlugin
 {
     public class WperfSourceParser : ISourceParser<CountingEvent, WperfSourceParser, string>
     {

@@ -29,12 +29,16 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
+using Json.Schema;
 using Microsoft.Performance.SDK.Processing;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Text.Json.Nodes;
 
-namespace WperfWPAPlugin
+namespace WPAPlugin
 {
     [ProcessingSource(
         "{05D8A372-EC56-43DE-83FF-02BDD9042727}",
@@ -42,7 +46,7 @@ namespace WperfWPAPlugin
         "Processes wperf counting trace files exported as JSON"
     )]
     [FileDataSource(".json", "JSON file output from wperf")]
-    public class SqlProcessingSourceWithSourceParser : ProcessingSource
+    public class WperfProcessingSourceWithSourceParser : ProcessingSource
     {
         private IApplicationEnvironment applicationEnvironment;
 
@@ -77,7 +81,6 @@ namespace WperfWPAPlugin
             ProcessorOptions options
         )
         {
-            // TODO: Check if we eventually need to support multiple files
             string[] filePathList = dataSources.Select(el => el.Uri.LocalPath).ToArray();
             WperfSourceParser parser = new WperfSourceParser(filePathList);
             return new WperfCustomDataProcessorWithSourceParser(
@@ -90,7 +93,24 @@ namespace WperfWPAPlugin
 
         protected override bool IsDataSourceSupportedCore(IDataSource source)
         {
-            throw new NotImplementedException();
+            string sourcePath = source.Uri.LocalPath;
+            string schemaPath = Path.Combine(
+                Environment.CurrentDirectory,
+                "Schemas",
+                "wperf.stat.schema"
+            );
+            if (!File.Exists(schemaPath))
+            {
+                throw new InvalidOperationException();
+            }
+
+            string schemaContent = File.ReadAllText(schemaPath);
+            JsonSchema schema = JsonSchema.FromText(schemaContent);
+            string jsonContent = File.ReadAllText(sourcePath);
+            var json = JsonNode.Parse(jsonContent);
+            bool isValid = schema.Evaluate(json).IsValid;
+
+            return isValid;
         }
 
         protected override void SetApplicationEnvironmentCore(

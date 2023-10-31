@@ -30,10 +30,9 @@
 
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
-
 using WperfWPAPlugin.Events;
 
-namespace WperfWPAPlugin
+namespace WPAPlugin
 {
     public class WperfCustomDataProcessorWithSourceParser
         : CustomDataProcessorWithSourceParser<CountingEvent, WperfSourceParser, string>

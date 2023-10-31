@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "Profile 1": {
+      "commandName": "Executable",
+      "executablePath": "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\wpa.exe",
+      "commandLineArgs": "-nodefault -addsearchdir \"%USERPROFILE%\\devProjects\\WPAPlugin\\WPAPlugin\\bin\\Debug\\netstandard2.0\""
+    }
+  }
+}

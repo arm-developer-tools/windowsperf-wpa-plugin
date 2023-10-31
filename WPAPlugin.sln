@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.7.34202.233
+VisualStudioVersion = 17.7.34018.315
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WPAPlugin", "WPAPlugin\WPAPlugin.csproj", "{B8FFD63A-A483-49D3-ABA7-059353714570}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WPAPlugin", "WPAPlugin\WPAPlugin.csproj", "{34302DB5-7B22-448B-A888-895D4F8301F6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B8FFD63A-A483-49D3-ABA7-059353714570}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B8FFD63A-A483-49D3-ABA7-059353714570}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B8FFD63A-A483-49D3-ABA7-059353714570}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B8FFD63A-A483-49D3-ABA7-059353714570}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34302DB5-7B22-448B-A888-895D4F8301F6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34302DB5-7B22-448B-A888-895D4F8301F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34302DB5-7B22-448B-A888-895D4F8301F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34302DB5-7B22-448B-A888-895D4F8301F6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {DC448782-1E5E-4D8D-8C3A-53A7F9348788}
+		SolutionGuid = {381B8FE8-8C8E-4ADE-8DDC-ECB64F5DED20}
 	EndGlobalSection
 EndGlobal
