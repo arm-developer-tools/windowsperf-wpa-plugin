@@ -30,7 +30,7 @@
 
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
-using WperfWPAPlugin.Events;
+using WPAPlugin.Events;
 
 namespace WPAPlugin
 {

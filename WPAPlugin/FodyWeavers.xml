@@ -4,6 +4,7 @@
       JsonSchema.Net
       Json.More
       JsonPointer.Net
+      NewtonSoft.Json
     </IncludeAssemblies>
   </Costura>
 </Weavers>

@@ -30,18 +30,19 @@
 
 using Microsoft.Performance.SDK.Extensibility;
 
-namespace WperfWPAPlugin.Constants
+namespace WPAPlugin.Constants
 {
     public static class WperfPluginConstants
     {
+        public const string PerformanceCounterEventKey = "PerformanceCounterEvent";
         public const string ParserId = "WperfSourceParser";
 
         public const string CookerId = "WperfDataCooker";
 
         // Path to access the cooked data
         public static readonly DataCookerPath CookerPath = DataCookerPath.ForSource(
-            WperfPluginConstants.ParserId,
-            WperfPluginConstants.CookerId
+            ParserId,
+            CookerId
         );
     }
 }

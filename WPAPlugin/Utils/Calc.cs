@@ -28,21 +28,30 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using Microsoft.Performance.SDK;
-
-namespace WPAPlugin.Events
+namespace WPAPlugin.Utils
 {
-    public class CountingEventWithRelativeTimestamp : CountingEvent
+    internal static class Calc
     {
-        public Timestamp RelativeTimestamp { get; private set; }
-
-        public CountingEventWithRelativeTimestamp(
-            CountingEvent countingEvent,
-            Timestamp relativeTimestamp
+        public static int CalculateProgress(
+            int currentFile,
+            int currentCore,
+            int? currentEvent,
+            int numFiles,
+            int numCores,
+            int? numEvents
         )
-            : base(countingEvent)
         {
-            RelativeTimestamp = relativeTimestamp;
+            double currentCoreCompletionPercentage = 0;
+            if (currentEvent != null && numEvents != null)
+            {
+                currentCoreCompletionPercentage = (double)((double)currentEvent / numEvents);
+            }
+            double currentFileCompletionPercentage =
+                (double)(currentCore + currentCoreCompletionPercentage) / numCores;
+
+            double percentComplete = (currentFile + currentFileCompletionPercentage) / numFiles;
+
+            return (int)(percentComplete * 100.0);
         }
     }
 }

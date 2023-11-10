@@ -36,11 +36,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
-using WPAPlugin;
-using WperfWPAPlugin.Constants;
-using WperfWPAPlugin.Events;
+using WPAPlugin.Constants;
+using WPAPlugin.Events;
 
-namespace WperfWPAPlugin
+namespace WPAPlugin
 {
     public class WperfDataCooker : SourceDataCooker<CountingEvent, WperfSourceParser, string>
     {
@@ -61,8 +60,10 @@ namespace WperfWPAPlugin
 
         public override string Description => "Adds relative timestamps to counting events";
 
-        // TODO : Check the needed keys for the events to send to this data cooker
-        public override ReadOnlyHashSet<string> DataKeys => throw new NotImplementedException();
+        public override ReadOnlyHashSet<string> DataKeys =>
+            new ReadOnlyHashSet<string>(
+                new HashSet<string> { WperfPluginConstants.PerformanceCounterEventKey }
+            );
 
         public override DataProcessingResult CookDataElement(
             CountingEvent data,
@@ -70,7 +71,16 @@ namespace WperfWPAPlugin
             CancellationToken cancellationToken
         )
         {
-            throw new NotImplementedException();
+            Timestamp TMP_Timestamp = Timestamp.FromMilliseconds(
+                DateTimeOffset.Now.ToUnixTimeMilliseconds()
+            );
+            CountingEventWithRelativeTimestamp cookedEvent = new CountingEventWithRelativeTimestamp(
+                data,
+                TMP_Timestamp
+            );
+            countingEventWithRelativeTimestamps.Add(cookedEvent);
+
+            return DataProcessingResult.Processed;
         }
     }
 }

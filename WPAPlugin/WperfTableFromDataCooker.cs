@@ -32,10 +32,11 @@ using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using WPAPlugin.Constants;
+using WPAPlugin.Events;
 
-using WperfWPAPlugin.Constants;
-
-namespace WperfWPAPlugin
+namespace WPAPlugin
 {
     [Table]
     public static class WperfTableFromDataCooker
@@ -51,6 +52,16 @@ namespace WperfWPAPlugin
 
         public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval tableData)
         {
+            IReadOnlyList<CountingEventWithRelativeTimestamp> lineItems = tableData.QueryOutput<
+                IReadOnlyList<CountingEventWithRelativeTimestamp>
+            >(
+                new DataOutputPath(
+                    WperfPluginConstants.CookerPath,
+                    nameof(WperfDataCooker.CountingEventWithRelativeTimestamps)
+                )
+            );
+
+            Debug.WriteLine(lineItems.Count);
             throw new NotImplementedException();
         }
     }

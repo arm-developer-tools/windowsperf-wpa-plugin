@@ -32,9 +32,12 @@ using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
-using WperfWPAPlugin.Constants;
-using WperfWPAPlugin.Events;
+using WPAPlugin.Constants;
+using WPAPlugin.Events;
+using WPAPlugin.Parsers;
+using WPAPlugin.Utils;
 
 namespace WPAPlugin
 {
@@ -67,6 +70,7 @@ namespace WPAPlugin
             // NOOP
         }
 
+        // TODO: incorporate progress reporting
         public void ProcessSource(
             ISourceDataProcessor<CountingEvent, WperfSourceParser, string> dataProcessor,
             ILogger logger,
@@ -74,7 +78,68 @@ namespace WPAPlugin
             CancellationToken cancellationToken
         )
         {
-            throw new NotImplementedException();
+            int currentFile = 0;
+            int filesCount = filePathList.Length;
+
+            foreach (string file in filePathList)
+            {
+                string jsonContent = File.ReadAllText(file);
+                WperfStats wperfStats = WperfStats.FromJson(jsonContent);
+                int coreCount = wperfStats.Core.PerformanceCounters.Length;
+                int currentCore = 0;
+                foreach (CorePerformanceCounter core in wperfStats.Core.PerformanceCounters)
+                {
+                    int eventCount = core.PerformanceCounter.Length;
+                    int currentEvent = 0;
+                    foreach (CorePerformanceCounterItem rawCountingEvent in core.PerformanceCounter)
+                    {
+                        CountingEvent countingEvent = new CountingEvent(
+                            core.CoreNumber,
+                            rawCountingEvent.EventName,
+                            rawCountingEvent.EventIdx,
+                            rawCountingEvent.EventNote
+                        );
+                        _ = dataProcessor.ProcessDataElement(
+                            countingEvent,
+                            this,
+                            cancellationToken
+                        );
+                        progress.Report(
+                            Calc.CalculateProgress(
+                                currentFile,
+                                currentCore,
+                                currentEvent,
+                                filesCount,
+                                coreCount,
+                                eventCount
+                            )
+                        );
+                        currentEvent++;
+                    }
+                    progress.Report(
+                        Calc.CalculateProgress(
+                            currentFile,
+                            currentCore,
+                            currentEvent,
+                            filesCount,
+                            coreCount,
+                            eventCount
+                        )
+                    );
+                    currentCore++;
+                }
+                progress.Report(
+                    Calc.CalculateProgress(
+                        currentFile,
+                        currentCore,
+                        null,
+                        filesCount,
+                        coreCount,
+                        null
+                    )
+                );
+                currentFile++;
+            }
         }
     }
 }

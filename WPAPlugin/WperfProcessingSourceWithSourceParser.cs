@@ -33,7 +33,6 @@ using Json.Schema;
 using Microsoft.Performance.SDK.Processing;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json.Nodes;
@@ -99,15 +98,10 @@ namespace WPAPlugin
                 "Schemas",
                 "wperf.stat.schema"
             );
-            if (!File.Exists(schemaPath))
-            {
-                throw new InvalidOperationException();
-            }
-
             string schemaContent = File.ReadAllText(schemaPath);
             JsonSchema schema = JsonSchema.FromText(schemaContent);
             string jsonContent = File.ReadAllText(sourcePath);
-            var json = JsonNode.Parse(jsonContent);
+            JsonNode json = JsonNode.Parse(jsonContent);
             bool isValid = schema.Evaluate(json).IsValid;
 
             return isValid;

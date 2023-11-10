@@ -29,15 +29,39 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using Microsoft.Performance.SDK.Extensibility;
-using System;
 
-namespace WperfWPAPlugin.Events
+namespace WPAPlugin.Events
 {
     public class CountingEvent : IKeyedDataType<string>
     {
+        public int CoreNumber { get; private set; }
+        public string EventName { get; private set; }
+        public string EventIndex { get; private set; }
+        public string EventNote { get; private set; }
+
+        public CountingEvent(int CoreNumber, string EventName, string EventIndex, string EventNote)
+        {
+            (this.CoreNumber, this.EventName, this.EventIndex, this.EventNote) = (
+                CoreNumber,
+                EventName,
+                EventIndex,
+                EventNote
+            );
+        }
+
+        public CountingEvent(CountingEvent countingEvent)
+        {
+            (CoreNumber, EventName, EventIndex, EventNote) = (
+                countingEvent.CoreNumber,
+                countingEvent.EventName,
+                countingEvent.EventIndex,
+                countingEvent.EventNote
+            );
+        }
+
         public string GetKey()
         {
-            throw new NotImplementedException();
+            return Constants.WperfPluginConstants.PerformanceCounterEventKey;
         }
     }
 }
