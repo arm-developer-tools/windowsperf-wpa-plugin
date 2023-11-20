@@ -64,7 +64,7 @@ namespace WPAPlugin.Parsers
         [JsonProperty("overall", Required = Required.Always)]
         public CoreOverall Overall { get; set; }
 
-        [JsonProperty("performance_counters", Required = Required.Always)]
+        [JsonProperty("cores", Required = Required.Always)]
         public CorePerformanceCounter[] PerformanceCounters { get; set; }
 
         [JsonProperty(
@@ -78,7 +78,7 @@ namespace WPAPlugin.Parsers
     public partial class CoreOverall
     {
         [JsonProperty(
-            "systemwide_overall_performance_counters",
+            "Systemwide_Overall_Performance_Counters",
             Required = Required.DisallowNull,
             NullValueHandling = NullValueHandling.Ignore
         )]
@@ -135,7 +135,7 @@ namespace WPAPlugin.Parsers
         [JsonProperty("core_number", Required = Required.Always)]
         public int CoreNumber { get; set; }
 
-        [JsonProperty("performance_counter", Required = Required.Always)]
+        [JsonProperty("Performance_counter", Required = Required.Always)]
         public CorePerformanceCounterItem[] PerformanceCounter { get; set; }
     }
 
@@ -329,7 +329,11 @@ namespace WPAPlugin.Parsers
         [JsonProperty("overall", Required = Required.Always)]
         public DsuOverall Overall { get; set; }
 
-        [JsonProperty("performance_counters", Required = Required.Always)]
+        [JsonProperty(
+            "cores",
+            Required = Required.DisallowNull,
+            NullValueHandling = NullValueHandling.Ignore
+        )]
         public DsuPerformanceCounter[] PerformanceCounters { get; set; }
     }
 
@@ -377,7 +381,7 @@ namespace WPAPlugin.Parsers
     public partial class DsuOverall
     {
         [JsonProperty(
-            "systemwide_overall_performance_counters",
+            "Systemwide_Overall_Performance_Counters",
             Required = Required.DisallowNull,
             NullValueHandling = NullValueHandling.Ignore
         )]
@@ -434,7 +438,7 @@ namespace WPAPlugin.Parsers
         [JsonProperty("core_number", Required = Required.Always)]
         public int CoreNumber { get; set; }
 
-        [JsonProperty("performance_counter", Required = Required.Always)]
+        [JsonProperty("Performance_counter", Required = Required.Always)]
         public DsuPerformanceCounterItem[] PerformanceCounter { get; set; }
     }
 

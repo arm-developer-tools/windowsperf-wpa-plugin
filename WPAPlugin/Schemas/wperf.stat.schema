@@ -9,27 +9,27 @@
         "core": {
             "type": "object",
             "required": [
-                "multiplexing",
-                "kernel_mode",
+                "Multiplexing",
+                "Kernel_mode",
                 "overall",
-                "performance_counters"
+                "cores"
             ],
             "minProperties": 4,
             "additionalProperties": false,
             "properties": {
-                "performance_counters": {
+                "cores": {
                     "type": "array",
                     "items": {
                         "type": "object",
                         "required": [
                             "core_number",
-                            "performance_counter"
+                            "Performance_counter"
                         ],
                         "properties": {
                             "core_number": {
                                 "type": "integer"
                             },
-                            "performance_counter": {
+                            "Performance_counter": {
                                 "type": "array",
                                 "items": {
                                     "type": "object",
@@ -65,16 +65,16 @@
                         }
                     }
                 },
-                "multiplexing": {
+                "Multiplexing": {
                     "type": "boolean"
                 },
-                "kernel_mode": {
+                "Kernel_mode": {
                     "type": "boolean"
                 },
                 "overall": {
                     "type": "object",
                     "properties": {
-                        "systemwide_overall_performance_counters": {
+                        "Systemwide_Overall_Performance_Counters": {
                             "type": "array",
                             "items": {
                                 "type": "object",
@@ -136,24 +136,23 @@
             "type": "object",
             "required": [
                 "l3metric",
-                "overall",
-                "performance_counters"
+                "overall"
             ],
             "additionalProperties": false,
             "properties": {
-                "performance_counters": {
+                "cores": {
                     "type": "array",
                     "items": {
                         "type": "object",
                         "required": [
                             "core_number",
-                            "performance_counter"
+                            "Performance_counter"
                         ],
                         "properties": {
                             "core_number": {
                                 "type": "integer"
                             },
-                            "performance_counter": {
+                            "Performance_counter": {
                                 "type": "array",
                                 "items": {
                                     "type": "object",
@@ -220,7 +219,7 @@
                     "type": "object",
                     "additionalProperties": false,
                     "properties": {
-                        "systemwide_overall_performance_counters": {
+                        "Systemwide_Overall_Performance_Counters": {
                             "type": "array",
                             "items": {
                                 "type": "object",

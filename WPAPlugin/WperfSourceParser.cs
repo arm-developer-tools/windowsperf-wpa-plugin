@@ -95,6 +95,7 @@ namespace WPAPlugin
                     {
                         CountingEvent countingEvent = new CountingEvent(
                             core.CoreNumber,
+                            rawCountingEvent.CounterValue,
                             rawCountingEvent.EventName,
                             rawCountingEvent.EventIdx,
                             rawCountingEvent.EventNote

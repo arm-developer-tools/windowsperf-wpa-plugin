@@ -32,7 +32,6 @@ using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using WPAPlugin.Constants;
 using WPAPlugin.Events;
 
@@ -50,6 +49,44 @@ namespace WPAPlugin
                 requiredDataCookers: new List<DataCookerPath> { WperfPluginConstants.CookerPath }
             );
 
+        private static readonly ColumnConfiguration CoreColumn = new ColumnConfiguration(
+            new ColumnMetadata(
+                new Guid("{00289B0C-F228-4A1F-BE23-95DA254FF69F}"),
+                "Core",
+                "Core Number"
+            )
+        );
+        private static readonly ColumnConfiguration ValueColumn = new ColumnConfiguration(
+            new ColumnMetadata(
+                new Guid("{6D49D34B-CBEA-4446-88D8-484D361672CF}"),
+                "Value",
+                "Value Number"
+            ),
+            new UIHints { AggregationMode = AggregationMode.Sum }
+        );
+
+        private static readonly ColumnConfiguration EventNameColumn = new ColumnConfiguration(
+            new ColumnMetadata(
+                new Guid("{0B8AC083-D8F6-40B5-9151-3B03C14316F9}"),
+                "Name",
+                "Event Name"
+            )
+        );
+        private static readonly ColumnConfiguration EventIndexColumn = new ColumnConfiguration(
+            new ColumnMetadata(
+                new Guid("{9CD484D9-47E0-48A4-9555-BDD2D396B247}"),
+                "Index",
+                "Event Index"
+            )
+        );
+        private static readonly ColumnConfiguration EventNoteColumn = new ColumnConfiguration(
+            new ColumnMetadata(
+                new Guid("{5EAF2668-EBAF-4D76-B63D-C3AFB0EC89D9}"),
+                "Note",
+                "Event Note"
+            )
+        );
+
         public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval tableData)
         {
             IReadOnlyList<CountingEventWithRelativeTimestamp> lineItems = tableData.QueryOutput<
@@ -61,8 +98,49 @@ namespace WPAPlugin
                 )
             );
 
-            Debug.WriteLine(lineItems.Count);
-            throw new NotImplementedException();
+            IProjection<int, CountingEventWithRelativeTimestamp> baseProjection = Projection.Index(
+                lineItems
+            );
+            IProjection<int, int> coreProjection = baseProjection.Compose(el => el.CoreNumber);
+            IProjection<int, string> nameProjection = baseProjection.Compose(el => el.EventName);
+            IProjection<int, long> valueProjection = baseProjection.Compose(el => el.Value);
+            IProjection<int, string> indexProjection = baseProjection.Compose(el => el.EventIndex);
+            IProjection<int, string> noteProjection = baseProjection.Compose(el => el.EventNote);
+
+            TableConfiguration groupByCoreConfig = new TableConfiguration("Group by core")
+            {
+                Columns = new[]
+                {
+                    CoreColumn,
+                    TableConfiguration.PivotColumn,
+                    EventNameColumn,
+                    ValueColumn,
+                    EventNoteColumn,
+                },
+            };
+
+            TableConfiguration groupByEventConfig = new TableConfiguration("Group by event")
+            {
+                Columns = new[]
+                {
+                    EventNameColumn,
+                    TableConfiguration.PivotColumn,
+                    ValueColumn,
+                    CoreColumn,
+                    EventNoteColumn,
+                },
+            };
+
+            _ = tableBuilder
+                .AddTableConfiguration(groupByCoreConfig)
+                .AddTableConfiguration(groupByEventConfig)
+                .SetDefaultTableConfiguration(groupByEventConfig)
+                .SetRowCount(lineItems.Count)
+                .AddColumn(CoreColumn, coreProjection)
+                .AddColumn(EventNameColumn, nameProjection)
+                .AddColumn(ValueColumn, valueProjection)
+                .AddColumn(EventIndexColumn, indexProjection)
+                .AddColumn(EventNoteColumn, noteProjection);
         }
     }
 }

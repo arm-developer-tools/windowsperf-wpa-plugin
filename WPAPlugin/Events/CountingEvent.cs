@@ -35,14 +35,22 @@ namespace WPAPlugin.Events
     public class CountingEvent : IKeyedDataType<string>
     {
         public int CoreNumber { get; private set; }
+        public long Value { get; private set; }
         public string EventName { get; private set; }
         public string EventIndex { get; private set; }
         public string EventNote { get; private set; }
 
-        public CountingEvent(int CoreNumber, string EventName, string EventIndex, string EventNote)
+        public CountingEvent(
+            int CoreNumber,
+            long Value,
+            string EventName,
+            string EventIndex,
+            string EventNote
+        )
         {
-            (this.CoreNumber, this.EventName, this.EventIndex, this.EventNote) = (
+            (this.CoreNumber, this.Value, this.EventName, this.EventIndex, this.EventNote) = (
                 CoreNumber,
+                Value,
                 EventName,
                 EventIndex,
                 EventNote
@@ -51,8 +59,9 @@ namespace WPAPlugin.Events
 
         public CountingEvent(CountingEvent countingEvent)
         {
-            (CoreNumber, EventName, EventIndex, EventNote) = (
+            (CoreNumber, Value, EventName, EventIndex, EventNote) = (
                 countingEvent.CoreNumber,
+                countingEvent.Value,
                 countingEvent.EventName,
                 countingEvent.EventIndex,
                 countingEvent.EventNote
