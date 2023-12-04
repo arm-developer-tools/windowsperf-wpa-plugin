@@ -40,31 +40,40 @@ namespace WPAPlugin.Events
         public string EventIndex { get; private set; }
         public string EventNote { get; private set; }
 
+        public double StartTime { get; private set; }
+        public double EndTime { get; private set; }
+
         public CountingEvent(
             int CoreNumber,
             long Value,
             string EventName,
             string EventIndex,
-            string EventNote
+            string EventNote,
+            double StartTime,
+            double EndTime
         )
         {
-            (this.CoreNumber, this.Value, this.EventName, this.EventIndex, this.EventNote) = (
-                CoreNumber,
-                Value,
-                EventName,
-                EventIndex,
-                EventNote
-            );
+            (
+                this.CoreNumber,
+                this.Value,
+                this.EventName,
+                this.EventIndex,
+                this.EventNote,
+                this.StartTime,
+                this.EndTime
+            ) = (CoreNumber, Value, EventName, EventIndex, EventNote, StartTime, EndTime);
         }
 
         public CountingEvent(CountingEvent countingEvent)
         {
-            (CoreNumber, Value, EventName, EventIndex, EventNote) = (
+            (CoreNumber, Value, EventName, EventIndex, EventNote, StartTime, EndTime) = (
                 countingEvent.CoreNumber,
                 countingEvent.Value,
                 countingEvent.EventName,
                 countingEvent.EventIndex,
-                countingEvent.EventNote
+                countingEvent.EventNote,
+                countingEvent.StartTime,
+                countingEvent.EndTime
             );
         }
 

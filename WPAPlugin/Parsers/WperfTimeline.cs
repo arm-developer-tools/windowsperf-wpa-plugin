@@ -28,38 +28,21 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-namespace WPAPlugin.Utils
+using Newtonsoft.Json;
+
+namespace WPAPlugin.Parsers
 {
-    internal static class Calc
+    public partial class WperfTimeline
     {
-        public static int CalculateProgress(
-            int currentFile,
-            int currentCore,
-            int currentEvent,
-            int currentCount,
-            int numFiles,
-            int numCores,
-            int numEvents,
-            int numCounts
-        )
+        [JsonProperty("timeline", Required = Required.Always)]
+        public WperfStats[] Timeline { get; set; }
+    }
+
+    public partial class WperfTimeline
+    {
+        public static WperfTimeline FromJson(string json)
         {
-            {
-                // Calculate the completion percentage of the current event within the current core
-                double curentCoreCompletion = (double)currentEvent / numEvents;
-
-                // Calculate the completion percentage of the current core within the current file
-                double currentCountCompletion =
-                    (double)(currentCore + curentCoreCompletion) / numCores;
-
-                // Calculate the completion percentage of the current file
-                double currentFileCompletion =
-                    (double)(currentCount + currentCountCompletion) / numCounts;
-
-                // Calculate the overall progress
-                double percentComplete = (currentFile + currentFileCompletion) / numFiles;
-
-                return (int)(percentComplete * 100.0);
-            }
+            return JsonConvert.DeserializeObject<WperfTimeline>(json, Converter.Settings);
         }
     }
 }

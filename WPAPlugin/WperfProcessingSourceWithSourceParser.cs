@@ -74,14 +74,18 @@ namespace WPAPlugin
             };
         }
 
+        // IsDataSourceSupportedCore is being triggered 3 times per file for an unknown reason
+        // So resorted to using a HashSet instead of a List to deduplicate the entries
+        private readonly HashSet<string> countingPathList = new HashSet<string>();
+        private readonly HashSet<string> timelinePathList = new HashSet<string>();
+
         protected override ICustomDataProcessor CreateProcessorCore(
             IEnumerable<IDataSource> dataSources,
             IProcessorEnvironment processorEnvironment,
             ProcessorOptions options
         )
         {
-            string[] filePathList = dataSources.Select(el => el.Uri.LocalPath).ToArray();
-            WperfSourceParser parser = new WperfSourceParser(filePathList);
+            WperfSourceParser parser = new WperfSourceParser(timelinePathList.ToArray());
             return new WperfCustomDataProcessorWithSourceParser(
                 parser,
                 options,
@@ -96,13 +100,18 @@ namespace WPAPlugin
             string schemaPath = Path.Combine(
                 Environment.CurrentDirectory,
                 "Schemas",
-                "wperf.stat.schema"
+                "wperf-timeline.stat.schema"
             );
             string schemaContent = File.ReadAllText(schemaPath);
             JsonSchema schema = JsonSchema.FromText(schemaContent);
             string jsonContent = File.ReadAllText(sourcePath);
             JsonNode json = JsonNode.Parse(jsonContent);
             bool isValid = schema.Evaluate(json).IsValid;
+
+            if (isValid)
+            {
+                _ = timelinePathList.Add(source.Uri.LocalPath);
+            }
 
             return isValid;
         }

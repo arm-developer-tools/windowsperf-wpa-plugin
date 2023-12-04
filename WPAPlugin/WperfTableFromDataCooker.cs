@@ -86,6 +86,23 @@ namespace WPAPlugin
                 "Event Note"
             )
         );
+        private static readonly ColumnConfiguration RelativeStartTimestampColumn =
+            new ColumnConfiguration(
+                new ColumnMetadata(
+                    new Guid("{0426DAE2-D30C-46BB-BBC8-0E0B3F68E95E}"),
+                    "Start",
+                    "Start Time"
+                )
+            );
+
+        private static readonly ColumnConfiguration RelativeEndTimestampColumn =
+            new ColumnConfiguration(
+                new ColumnMetadata(
+                    new Guid("{8FB5D961-8486-46E5-91F1-66BB4E1B82B9}"),
+                    "End",
+                    "End Time"
+                )
+            );
 
         public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval tableData)
         {
@@ -106,16 +123,23 @@ namespace WPAPlugin
             IProjection<int, long> valueProjection = baseProjection.Compose(el => el.Value);
             IProjection<int, string> indexProjection = baseProjection.Compose(el => el.EventIndex);
             IProjection<int, string> noteProjection = baseProjection.Compose(el => el.EventNote);
+            IProjection<int, Microsoft.Performance.SDK.Timestamp> relativeStartTimeProjection =
+                baseProjection.Compose(el => el.RelativeStartTimestamp);
+            IProjection<int, Microsoft.Performance.SDK.Timestamp> relativeEndTimeProjection =
+                baseProjection.Compose(el => el.RelativeEndTimestamp);
 
             TableConfiguration groupByCoreConfig = new TableConfiguration("Group by core")
             {
                 Columns = new[]
                 {
                     CoreColumn,
-                    TableConfiguration.PivotColumn,
                     EventNameColumn,
-                    ValueColumn,
+                    TableConfiguration.PivotColumn,
                     EventNoteColumn,
+                    RelativeStartTimestampColumn,
+                    RelativeEndTimestampColumn,
+                    TableConfiguration.GraphColumn,
+                    ValueColumn,
                 },
             };
 
@@ -124,12 +148,21 @@ namespace WPAPlugin
                 Columns = new[]
                 {
                     EventNameColumn,
-                    TableConfiguration.PivotColumn,
-                    ValueColumn,
                     CoreColumn,
+                    TableConfiguration.PivotColumn,
                     EventNoteColumn,
+                    RelativeStartTimestampColumn,
+                    RelativeEndTimestampColumn,
+                    TableConfiguration.GraphColumn,
+                    ValueColumn,
                 },
             };
+
+            groupByCoreConfig.AddColumnRole(ColumnRole.StartTime, RelativeStartTimestampColumn);
+            groupByEventConfig.AddColumnRole(ColumnRole.StartTime, RelativeStartTimestampColumn);
+
+            groupByCoreConfig.AddColumnRole(ColumnRole.EndTime, RelativeEndTimestampColumn);
+            groupByEventConfig.AddColumnRole(ColumnRole.EndTime, RelativeEndTimestampColumn);
 
             _ = tableBuilder
                 .AddTableConfiguration(groupByCoreConfig)
@@ -140,7 +173,9 @@ namespace WPAPlugin
                 .AddColumn(EventNameColumn, nameProjection)
                 .AddColumn(ValueColumn, valueProjection)
                 .AddColumn(EventIndexColumn, indexProjection)
-                .AddColumn(EventNoteColumn, noteProjection);
+                .AddColumn(EventNoteColumn, noteProjection)
+                .AddColumn(RelativeStartTimestampColumn, relativeStartTimeProjection)
+                .AddColumn(RelativeEndTimestampColumn, relativeEndTimeProjection);
         }
     }
 }

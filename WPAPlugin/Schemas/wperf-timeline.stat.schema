@@ -1,0 +1,337 @@
+﻿{
+  "type": "object",
+  "required": [
+    "timeline"
+  ],
+  "properties": {
+    "timeline": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "core",
+          "dsu",
+          "dmc"
+        ],
+        "properties": {
+          "core": {
+            "type": "object",
+            "required": [
+              "Multiplexing",
+              "Kernel_mode",
+              "overall",
+              "cores"
+            ],
+            "minProperties": 4,
+            "additionalProperties": false,
+            "properties": {
+              "cores": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "core_number",
+                    "Performance_counter"
+                  ],
+                  "properties": {
+                    "core_number": {
+                      "type": "integer"
+                    },
+                    "Performance_counter": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "counter_value",
+                          "event_idx",
+                          "event_name",
+                          "event_note"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                          "counter_value": {
+                            "type": "integer"
+                          },
+                          "event_idx": {
+                            "type": "string"
+                          },
+                          "event_name": {
+                            "type": "string"
+                          },
+                          "event_note": {
+                            "type": "string"
+                          },
+                          "multiplexed": {
+                            "type": "string"
+                          },
+                          "scaled_value": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "Multiplexing": {
+                "type": "boolean"
+              },
+              "Kernel_mode": {
+                "type": "boolean"
+              },
+              "overall": {
+                "type": "object",
+                "properties": {
+                  "Systemwide_Overall_Performance_Counters": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "counter_value": {
+                          "type": "integer"
+                        },
+                        "event_idx": {
+                          "type": "string"
+                        },
+                        "event_name": {
+                          "type": "string"
+                        },
+                        "event_note": {
+                          "type": "string"
+                        },
+                        "multiplexed": {
+                          "type": "string"
+                        },
+                        "scaled_value": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "ts_metric": {
+                "type": "object",
+                "properties": {
+                  "telemetry_solution_metrics": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "core": {
+                          "type": "string"
+                        },
+                        "product_name": {
+                          "type": "string"
+                        },
+                        "metric_name": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "string"
+                        },
+                        "unit": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "dsu": {
+            "type": "object",
+            "required": [
+              "l3metric",
+              "overall"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "cores": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "core_number",
+                    "Performance_counter"
+                  ],
+                  "properties": {
+                    "core_number": {
+                      "type": "integer"
+                    },
+                    "Performance_counter": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": [
+                          "counter_value",
+                          "event_idx",
+                          "event_name",
+                          "event_note"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                          "counter_value": {
+                            "type": "integer"
+                          },
+                          "event_idx": {
+                            "type": "string"
+                          },
+                          "event_name": {
+                            "type": "string"
+                          },
+                          "event_note": {
+                            "type": "string"
+                          },
+                          "multiplexed": {
+                            "type": "string"
+                          },
+                          "scaled_value": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "l3metric": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "L3_cache_metrics": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "cluster": {
+                          "type": "string"
+                        },
+                        "miss_rate": {
+                          "type": "string"
+                        },
+                        "read_bandwidth": {
+                          "type": "string"
+                        },
+                        "cores": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "overall": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "Systemwide_Overall_Performance_Counters": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "counter_value": {
+                          "type": "integer"
+                        },
+                        "event_idx": {
+                          "type": "string"
+                        },
+                        "event_name": {
+                          "type": "string"
+                        },
+                        "event_note": {
+                          "type": "string"
+                        },
+                        "multiplexed": {
+                          "type": "string"
+                        },
+                        "scaled_value": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "dmc": {
+            "type": "object",
+            "required": [
+              "pmu",
+              "ddr"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "pmu": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "PMU_performance_counters": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "counter_value": {
+                          "type": "integer"
+                        },
+                        "event_idx": {
+                          "type": "string"
+                        },
+                        "event_name": {
+                          "type": "string"
+                        },
+                        "event_note": {
+                          "type": "string"
+                        },
+                        "pmu_id": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "ddr": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "DDR_metrics": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "channel": {
+                          "type": "string"
+                        },
+                        "rw_bandwidth": {
+                          "type": "string"
+                        },
+                        "event_name": {
+                          "type": "string"
+                        },
+                        "event_note": {
+                          "type": "string"
+                        },
+                        "pmu_id": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "time_elapsed": {
+            "type": "number"
+          }
+        }
+      }
+    }
+  }
+}

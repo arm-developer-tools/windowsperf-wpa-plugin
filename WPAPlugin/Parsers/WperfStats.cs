@@ -50,7 +50,7 @@ namespace WPAPlugin.Parsers
             Required = Required.DisallowNull,
             NullValueHandling = NullValueHandling.Ignore
         )]
-        public double? TimeElapsed { get; set; }
+        public double TimeElapsed { get; set; }
     }
 
     public partial class Core
@@ -486,7 +486,7 @@ namespace WPAPlugin.Parsers
     {
         public static string ToJson(this WperfStats self)
         {
-            return JsonConvert.SerializeObject(self, WPAPlugin.Parsers.Converter.Settings);
+            return JsonConvert.SerializeObject(self, Converter.Settings);
         }
     }
 

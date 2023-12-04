@@ -32,7 +32,6 @@ using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading;
@@ -71,13 +70,15 @@ namespace WPAPlugin
             CancellationToken cancellationToken
         )
         {
-            Timestamp TMP_Timestamp = Timestamp.FromMilliseconds(
-                DateTimeOffset.Now.ToUnixTimeMilliseconds()
-            );
+            Timestamp relativeStartTimestamp = Timestamp.FromSeconds(data.StartTime);
+            Timestamp relativeEndTimestamp = Timestamp.FromSeconds(data.EndTime);
+
             CountingEventWithRelativeTimestamp cookedEvent = new CountingEventWithRelativeTimestamp(
                 data,
-                TMP_Timestamp
+                relativeStartTimestamp,
+                relativeEndTimestamp
             );
+            ;
             countingEventWithRelativeTimestamps.Add(cookedEvent);
 
             return DataProcessingResult.Processed;

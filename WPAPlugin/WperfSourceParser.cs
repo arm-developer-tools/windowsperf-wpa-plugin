@@ -28,6 +28,7 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility.SourceParsing;
 using Microsoft.Performance.SDK.Processing;
 using System;
@@ -50,8 +51,7 @@ namespace WPAPlugin
             this.filePathList = filePathList;
         }
 
-        public DataSourceInfo DataSourceInfo { get; }
-
+        public DataSourceInfo DataSourceInfo { get; private set; }
         public Type DataElementType => typeof(CountingEvent);
 
         public Type DataContextType => typeof(WperfSourceParser);
@@ -59,6 +59,8 @@ namespace WPAPlugin
         public Type DataKeyType => typeof(string);
 
         public int MaxSourceParseCount => 1;
+
+        public DateTime StartWallClockUtc { get; private set; }
 
         public string Id => WperfPluginConstants.ParserId;
 
@@ -70,7 +72,6 @@ namespace WPAPlugin
             // NOOP
         }
 
-        // TODO: incorporate progress reporting
         public void ProcessSource(
             ISourceDataProcessor<CountingEvent, WperfSourceParser, string> dataProcessor,
             ILogger logger,
@@ -81,66 +82,82 @@ namespace WPAPlugin
             int currentFile = 0;
             int filesCount = filePathList.Length;
 
+            long minTimestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
+            StartWallClockUtc = new DateTime(minTimestamp).ToUniversalTime();
+
+            double totalTimeElapsed = 0;
+            double previousTimeElapsed = 0;
             foreach (string file in filePathList)
             {
                 string jsonContent = File.ReadAllText(file);
-                WperfStats wperfStats = WperfStats.FromJson(jsonContent);
-                int coreCount = wperfStats.Core.PerformanceCounters.Length;
-                int currentCore = 0;
-                foreach (CorePerformanceCounter core in wperfStats.Core.PerformanceCounters)
+                WperfTimeline wperfTimeline = WperfTimeline.FromJson(jsonContent);
+
+                int totalCount = wperfTimeline.Timeline.Length;
+                int currentCount = 0;
+
+                foreach (WperfStats count in wperfTimeline.Timeline)
                 {
-                    int eventCount = core.PerformanceCounter.Length;
-                    int currentEvent = 0;
-                    foreach (CorePerformanceCounterItem rawCountingEvent in core.PerformanceCounter)
+                    int coreCount = count.Core.PerformanceCounters.Length;
+                    int currentCore = 0;
+                    if (currentCount > 0)
                     {
-                        CountingEvent countingEvent = new CountingEvent(
-                            core.CoreNumber,
-                            rawCountingEvent.CounterValue,
-                            rawCountingEvent.EventName,
-                            rawCountingEvent.EventIdx,
-                            rawCountingEvent.EventNote
-                        );
-                        _ = dataProcessor.ProcessDataElement(
-                            countingEvent,
-                            this,
-                            cancellationToken
-                        );
-                        progress.Report(
-                            Calc.CalculateProgress(
-                                currentFile,
-                                currentCore,
-                                currentEvent,
-                                filesCount,
-                                coreCount,
-                                eventCount
-                            )
-                        );
-                        currentEvent++;
+                        previousTimeElapsed = totalTimeElapsed;
                     }
-                    progress.Report(
-                        Calc.CalculateProgress(
-                            currentFile,
-                            currentCore,
-                            currentEvent,
-                            filesCount,
-                            coreCount,
-                            eventCount
+                    totalTimeElapsed += count.TimeElapsed;
+
+                    foreach (CorePerformanceCounter core in count.Core.PerformanceCounters)
+                    {
+                        int eventCount = core.PerformanceCounter.Length;
+                        int currentEvent = 0;
+                        foreach (
+                            CorePerformanceCounterItem rawCountingEvent in core.PerformanceCounter
                         )
-                    );
-                    currentCore++;
+                        {
+                            CountingEvent countingEvent = new CountingEvent(
+                                core.CoreNumber,
+                                rawCountingEvent.CounterValue,
+                                rawCountingEvent.EventName,
+                                rawCountingEvent.EventIdx,
+                                rawCountingEvent.EventNote,
+                                previousTimeElapsed,
+                                totalTimeElapsed
+                            );
+                            _ = dataProcessor.ProcessDataElement(
+                                countingEvent,
+                                this,
+                                cancellationToken
+                            );
+                            progress.Report(
+                                Calc.CalculateProgress(
+                                    currentFile,
+                                    currentCore,
+                                    currentEvent,
+                                    currentCount,
+                                    filesCount,
+                                    coreCount,
+                                    eventCount,
+                                    totalCount
+                                )
+                            );
+                            currentEvent++;
+                        }
+                        currentCore++;
+                    }
+                    currentCount++;
                 }
-                progress.Report(
-                    Calc.CalculateProgress(
-                        currentFile,
-                        currentCore,
-                        null,
-                        filesCount,
-                        coreCount,
-                        null
-                    )
-                );
                 currentFile++;
             }
+            Timestamp traceStartTimestamp = Timestamp.FromMilliseconds(minTimestamp);
+            Timestamp traceEndTimestamp = Timestamp.FromMilliseconds(
+                minTimestamp + (totalTimeElapsed * 1000)
+            );
+
+            DataSourceInfo = new DataSourceInfo(
+                0,
+                (traceEndTimestamp - traceStartTimestamp).ToNanoseconds,
+                StartWallClockUtc
+            );
+            ;
         }
     }
 }

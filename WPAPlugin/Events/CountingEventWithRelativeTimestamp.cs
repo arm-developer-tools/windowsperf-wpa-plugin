@@ -34,15 +34,20 @@ namespace WPAPlugin.Events
 {
     public class CountingEventWithRelativeTimestamp : CountingEvent
     {
-        public Timestamp RelativeTimestamp { get; private set; }
+        public Timestamp RelativeStartTimestamp { get; private set; }
+        public Timestamp RelativeEndTimestamp { get; private set; }
 
         public CountingEventWithRelativeTimestamp(
             CountingEvent countingEvent,
-            Timestamp relativeTimestamp
+            Timestamp relativeStartTimestamp,
+            Timestamp relativeEndTimestamp
         )
             : base(countingEvent)
         {
-            RelativeTimestamp = relativeTimestamp;
+            (RelativeStartTimestamp, RelativeEndTimestamp) = (
+                relativeStartTimestamp,
+                relativeEndTimestamp
+            );
         }
     }
 }
