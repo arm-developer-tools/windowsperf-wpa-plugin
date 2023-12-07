@@ -44,11 +44,13 @@ namespace WPAPlugin
 {
     public class WperfSourceParser : ISourceParser<CountingEvent, WperfSourceParser, string>
     {
-        private readonly string[] filePathList;
+        private readonly string[] timelineFilesPathList;
+        private readonly string[] countFilesPathList;
 
-        public WperfSourceParser(string[] filePathList)
+        public WperfSourceParser(string[] timelineFilesPathList, string[] countFilesPathList)
         {
-            this.filePathList = filePathList;
+            this.timelineFilesPathList = timelineFilesPathList;
+            this.countFilesPathList = countFilesPathList;
         }
 
         public DataSourceInfo DataSourceInfo { get; private set; }
@@ -72,22 +74,27 @@ namespace WPAPlugin
             // NOOP
         }
 
-        public void ProcessSource(
+        private void ProcessTimelineFiles(
             ISourceDataProcessor<CountingEvent, WperfSourceParser, string> dataProcessor,
-            ILogger logger,
             IProgress<int> progress,
-            CancellationToken cancellationToken
+            CancellationToken cancellationToken,
+            int totalFiles
         )
         {
+            int filesCount = timelineFilesPathList.Length;
+            if (filesCount == 0)
+            {
+                return;
+            }
+
             int currentFile = 0;
-            int filesCount = filePathList.Length;
 
             long minTimestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeMilliseconds();
             StartWallClockUtc = new DateTime(minTimestamp).ToUniversalTime();
 
             double totalTimeElapsed = 0;
             double previousTimeElapsed = 0;
-            foreach (string file in filePathList)
+            foreach (string file in timelineFilesPathList)
             {
                 string jsonContent = File.ReadAllText(file);
                 WperfTimeline wperfTimeline = WperfTimeline.FromJson(jsonContent);
@@ -95,7 +102,7 @@ namespace WPAPlugin
                 int totalCount = wperfTimeline.Timeline.Length;
                 int currentCount = 0;
 
-                foreach (WperfStats count in wperfTimeline.Timeline)
+                foreach (WperfCount count in wperfTimeline.Timeline)
                 {
                     int coreCount = count.Core.PerformanceCounters.Length;
                     int currentCore = 0;
@@ -114,6 +121,7 @@ namespace WPAPlugin
                         )
                         {
                             CountingEvent countingEvent = new CountingEvent(
+                                WperfPluginConstants.PerformanceCounterTimelineEventKey,
                                 core.CoreNumber,
                                 rawCountingEvent.CounterValue,
                                 rawCountingEvent.EventName,
@@ -137,7 +145,7 @@ namespace WPAPlugin
                                     coreCount,
                                     eventCount,
                                     totalCount
-                                )
+                                ) * (totalFiles / filesCount)
                             );
                             currentEvent++;
                         }
@@ -158,6 +166,80 @@ namespace WPAPlugin
                 StartWallClockUtc
             );
             ;
+        }
+
+        private void ProcessCountFiles(
+            ISourceDataProcessor<CountingEvent, WperfSourceParser, string> dataProcessor,
+            IProgress<int> progress,
+            CancellationToken cancellationToken,
+            int totalFiles
+        )
+        {
+            int filesCount = countFilesPathList.Length;
+            if (filesCount == 0)
+            {
+                return;
+            }
+
+            int currentFile = 0;
+
+            foreach (string file in countFilesPathList)
+            {
+                string jsonContent = File.ReadAllText(file);
+                WperfCount wperfTimeline = WperfCount.FromJson(jsonContent);
+
+                int coreCount = wperfTimeline.Core.PerformanceCounters.Length;
+                int currentCore = 0;
+
+                foreach (CorePerformanceCounter core in wperfTimeline.Core.PerformanceCounters)
+                {
+                    int eventCount = core.PerformanceCounter.Length;
+                    int currentEvent = 0;
+                    foreach (CorePerformanceCounterItem rawCountingEvent in core.PerformanceCounter)
+                    {
+                        CountingEvent countingEvent = new CountingEvent(
+                            WperfPluginConstants.PerformanceCounterEventKey,
+                            core.CoreNumber,
+                            rawCountingEvent.CounterValue,
+                            rawCountingEvent.EventName,
+                            rawCountingEvent.EventIdx,
+                            rawCountingEvent.EventNote
+                        );
+                        _ = dataProcessor.ProcessDataElement(
+                            countingEvent,
+                            this,
+                            cancellationToken
+                        );
+                        progress.Report(
+                            Calc.CalculateProgress(
+                                currentFile,
+                                currentCore,
+                                currentEvent,
+                                1,
+                                filesCount,
+                                coreCount,
+                                eventCount,
+                                1
+                            ) * (totalFiles / filesCount)
+                        );
+                        currentEvent++;
+                    }
+                    currentCore++;
+                }
+                currentFile++;
+            }
+        }
+
+        public void ProcessSource(
+            ISourceDataProcessor<CountingEvent, WperfSourceParser, string> dataProcessor,
+            ILogger logger,
+            IProgress<int> progress,
+            CancellationToken cancellationToken
+        )
+        {
+            int totalFiles = countFilesPathList.Length + timelineFilesPathList.Length;
+            ProcessTimelineFiles(dataProcessor, progress, cancellationToken, totalFiles);
+            ProcessCountFiles(dataProcessor, progress, cancellationToken, totalFiles);
         }
     }
 }

@@ -85,7 +85,13 @@ namespace WPAPlugin
             ProcessorOptions options
         )
         {
-            WperfSourceParser parser = new WperfSourceParser(timelinePathList.ToArray());
+            WperfSourceParser parser = new WperfSourceParser(
+                timelinePathList.ToArray(),
+                countingPathList.ToArray()
+            );
+
+            timelinePathList.Clear();
+            countingPathList.Clear();
             return new WperfCustomDataProcessorWithSourceParser(
                 parser,
                 options,
@@ -94,26 +100,36 @@ namespace WPAPlugin
             );
         }
 
-        protected override bool IsDataSourceSupportedCore(IDataSource source)
+        private static bool ValidateJson(string sourcePath, string schemaName)
         {
-            string sourcePath = source.Uri.LocalPath;
-            string schemaPath = Path.Combine(
-                Environment.CurrentDirectory,
-                "Schemas",
-                "wperf-timeline.stat.schema"
-            );
+            string schemaPath = Path.Combine(Environment.CurrentDirectory, "Schemas", schemaName);
             string schemaContent = File.ReadAllText(schemaPath);
             JsonSchema schema = JsonSchema.FromText(schemaContent);
             string jsonContent = File.ReadAllText(sourcePath);
             JsonNode json = JsonNode.Parse(jsonContent);
-            bool isValid = schema.Evaluate(json).IsValid;
+            return schema.Evaluate(json).IsValid;
+        }
 
-            if (isValid)
+        protected override bool IsDataSourceSupportedCore(IDataSource source)
+        {
+            string sourcePath = source.Uri.LocalPath;
+            bool isValidTimeline = ValidateJson(sourcePath, "wperf-timeline.stat.schema");
+            bool isValidCount = false;
+
+            if (isValidTimeline)
             {
-                _ = timelinePathList.Add(source.Uri.LocalPath);
+                _ = timelinePathList.Add(sourcePath);
+            }
+            else
+            {
+                isValidCount = ValidateJson(sourcePath, "wperf.stat.schema");
+                if (isValidCount)
+                {
+                    _ = countingPathList.Add(sourcePath);
+                }
             }
 
-            return isValid;
+            return isValidCount || isValidTimeline;
         }
 
         protected override void SetApplicationEnvironmentCore(

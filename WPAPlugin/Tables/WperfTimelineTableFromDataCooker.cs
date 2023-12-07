@@ -28,24 +28,25 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 using System;
 using System.Collections.Generic;
 using WPAPlugin.Constants;
+using WPAPlugin.DataCookers;
 using WPAPlugin.Events;
 
-namespace WPAPlugin
+namespace WPAPlugin.Tables
 {
     [Table]
-    public static class WperfTableFromDataCooker
+    public static class WperfTimelineTableFromDataCooker
     {
         public static TableDescriptor TableDescriptor =>
             new TableDescriptor(
                 Guid.Parse("{E732B8E4-4D69-48D7-848D-79C796DC6E25}"),
-                "Counting events from Data Cooker",
-                "Counting events parsed from wperf JSON output",
-                "wperf",
+                "Timeline events from Data Cooker",
+                "Timeline events parsed from wperf JSON output",
                 requiredDataCookers: new List<DataCookerPath> { WperfPluginConstants.CookerPath }
             );
 
@@ -111,7 +112,7 @@ namespace WPAPlugin
             >(
                 new DataOutputPath(
                     WperfPluginConstants.CookerPath,
-                    nameof(WperfDataCooker.CountingEventWithRelativeTimestamps)
+                    nameof(WperfTimelineDataCooker.CountingEventWithRelativeTimestamps)
                 )
             );
 
@@ -123,10 +124,12 @@ namespace WPAPlugin
             IProjection<int, long> valueProjection = baseProjection.Compose(el => el.Value);
             IProjection<int, string> indexProjection = baseProjection.Compose(el => el.EventIndex);
             IProjection<int, string> noteProjection = baseProjection.Compose(el => el.EventNote);
-            IProjection<int, Microsoft.Performance.SDK.Timestamp> relativeStartTimeProjection =
-                baseProjection.Compose(el => el.RelativeStartTimestamp);
-            IProjection<int, Microsoft.Performance.SDK.Timestamp> relativeEndTimeProjection =
-                baseProjection.Compose(el => el.RelativeEndTimestamp);
+            IProjection<int, Timestamp> relativeStartTimeProjection = baseProjection.Compose(
+                el => el.RelativeStartTimestamp
+            );
+            IProjection<int, Timestamp> relativeEndTimeProjection = baseProjection.Compose(
+                el => el.RelativeEndTimestamp
+            );
 
             TableConfiguration groupByCoreConfig = new TableConfiguration("Group by core")
             {

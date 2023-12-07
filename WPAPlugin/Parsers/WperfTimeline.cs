@@ -35,7 +35,7 @@ namespace WPAPlugin.Parsers
     public partial class WperfTimeline
     {
         [JsonProperty("timeline", Required = Required.Always)]
-        public WperfStats[] Timeline { get; set; }
+        public WperfCount[] Timeline { get; set; }
     }
 
     public partial class WperfTimeline

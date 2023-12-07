@@ -38,30 +38,31 @@ using System.Threading;
 using WPAPlugin.Constants;
 using WPAPlugin.Events;
 
-namespace WPAPlugin
+namespace WPAPlugin.DataCookers
 {
-    public class WperfDataCooker : SourceDataCooker<CountingEvent, WperfSourceParser, string>
+    public class WperfCountDataCooker : SourceDataCooker<CountingEvent, WperfSourceParser, string>
     {
-        private readonly List<CountingEventWithRelativeTimestamp> countingEventWithRelativeTimestamps;
+        private readonly List<CountingEvent> countingEvents;
 
         [DataOutput]
-        public IReadOnlyList<CountingEventWithRelativeTimestamp> CountingEventWithRelativeTimestamps { get; }
+        public IReadOnlyList<CountingEvent> CountingEvents { get; }
 
-        public WperfDataCooker()
-            : base(WperfPluginConstants.CookerPath)
+        public WperfCountDataCooker()
+            : base(WperfPluginConstants.CountCookerPath)
         {
-            countingEventWithRelativeTimestamps = new List<CountingEventWithRelativeTimestamp>();
-            CountingEventWithRelativeTimestamps =
-                new ReadOnlyCollection<CountingEventWithRelativeTimestamp>(
-                    countingEventWithRelativeTimestamps
-                );
+            countingEvents = new List<CountingEvent>();
+            CountingEvents = new ReadOnlyCollection<CountingEvent>(countingEvents);
         }
 
-        public override string Description => "Adds relative timestamps to counting events";
+        public override string Description => "Passes on the counting data as is";
 
         public override ReadOnlyHashSet<string> DataKeys =>
             new ReadOnlyHashSet<string>(
-                new HashSet<string> { WperfPluginConstants.PerformanceCounterEventKey }
+                new HashSet<string>
+                {
+                    WperfPluginConstants.PerformanceCounterEventKey,
+                    WperfPluginConstants.PerformanceCounterTimelineEventKey
+                }
             );
 
         public override DataProcessingResult CookDataElement(
@@ -70,16 +71,7 @@ namespace WPAPlugin
             CancellationToken cancellationToken
         )
         {
-            Timestamp relativeStartTimestamp = Timestamp.FromSeconds(data.StartTime);
-            Timestamp relativeEndTimestamp = Timestamp.FromSeconds(data.EndTime);
-
-            CountingEventWithRelativeTimestamp cookedEvent = new CountingEventWithRelativeTimestamp(
-                data,
-                relativeStartTimestamp,
-                relativeEndTimestamp
-            );
-            ;
-            countingEventWithRelativeTimestamps.Add(cookedEvent);
+            countingEvents.Add(data);
 
             return DataProcessingResult.Processed;
         }

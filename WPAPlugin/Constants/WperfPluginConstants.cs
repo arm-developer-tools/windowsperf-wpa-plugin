@@ -34,15 +34,26 @@ namespace WPAPlugin.Constants
 {
     public static class WperfPluginConstants
     {
+        // Event Identifiers used by Data cookers
         public const string PerformanceCounterEventKey = "PerformanceCounterEvent";
+        public const string PerformanceCounterTimelineEventKey = "PerformanceCounterTimelineEvent";
+
+        // Parser ID (There should be no reason to have multiple parsers as of now)
         public const string ParserId = "WperfSourceParser";
 
-        public const string CookerId = "WperfDataCooker";
+        // Cooker IDs
+        public const string TimelineCookerId = "WperfDataCooker";
+        public const string CountCookerId = "WperfCountDataCooker";
 
-        // Path to access the cooked data
+        // Cooker Paths
         public static readonly DataCookerPath CookerPath = DataCookerPath.ForSource(
             ParserId,
-            CookerId
+            TimelineCookerId
+        );
+
+        public static readonly DataCookerPath CountCookerPath = DataCookerPath.ForSource(
+            ParserId,
+            CountCookerId
         );
     }
 }

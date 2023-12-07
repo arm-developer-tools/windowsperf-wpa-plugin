@@ -34,7 +34,7 @@ using System.Globalization;
 
 namespace WPAPlugin.Parsers
 {
-    public partial class WperfStats
+    public partial class WperfCount
     {
         [JsonProperty("core", Required = Required.Always)]
         public Core Core { get; set; }
@@ -471,11 +471,11 @@ namespace WPAPlugin.Parsers
         public long? ScaledValue { get; set; }
     }
 
-    public partial class WperfStats
+    public partial class WperfCount
     {
-        public static WperfStats FromJson(string json)
+        public static WperfCount FromJson(string json)
         {
-            return JsonConvert.DeserializeObject<WperfStats>(
+            return JsonConvert.DeserializeObject<WperfCount>(
                 json,
                 WPAPlugin.Parsers.Converter.Settings
             );
@@ -484,7 +484,7 @@ namespace WPAPlugin.Parsers
 
     public static class Serialize
     {
-        public static string ToJson(this WperfStats self)
+        public static string ToJson(this WperfCount self)
         {
             return JsonConvert.SerializeObject(self, Converter.Settings);
         }

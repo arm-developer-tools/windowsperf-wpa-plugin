@@ -39,11 +39,12 @@ namespace WPAPlugin.Events
         public string EventName { get; private set; }
         public string EventIndex { get; private set; }
         public string EventNote { get; private set; }
-
         public double StartTime { get; private set; }
         public double EndTime { get; private set; }
+        public string Key { get; private set; }
 
         public CountingEvent(
+            string Key,
             int CoreNumber,
             long Value,
             string EventName,
@@ -54,6 +55,7 @@ namespace WPAPlugin.Events
         )
         {
             (
+                this.Key,
                 this.CoreNumber,
                 this.Value,
                 this.EventName,
@@ -61,12 +63,32 @@ namespace WPAPlugin.Events
                 this.EventNote,
                 this.StartTime,
                 this.EndTime
-            ) = (CoreNumber, Value, EventName, EventIndex, EventNote, StartTime, EndTime);
+            ) = (Key, CoreNumber, Value, EventName, EventIndex, EventNote, StartTime, EndTime);
+        }
+
+        public CountingEvent(
+            string Key,
+            int CoreNumber,
+            long Value,
+            string EventName,
+            string EventIndex,
+            string EventNote
+        )
+        {
+            (
+                this.Key,
+                this.CoreNumber,
+                this.Value,
+                this.EventName,
+                this.EventIndex,
+                this.EventNote
+            ) = (Key, CoreNumber, Value, EventName, EventIndex, EventNote);
         }
 
         public CountingEvent(CountingEvent countingEvent)
         {
-            (CoreNumber, Value, EventName, EventIndex, EventNote, StartTime, EndTime) = (
+            (Key, CoreNumber, Value, EventName, EventIndex, EventNote, StartTime, EndTime) = (
+                countingEvent.Key,
                 countingEvent.CoreNumber,
                 countingEvent.Value,
                 countingEvent.EventName,
@@ -79,7 +101,7 @@ namespace WPAPlugin.Events
 
         public string GetKey()
         {
-            return Constants.WperfPluginConstants.PerformanceCounterEventKey;
+            return Key;
         }
     }
 }
