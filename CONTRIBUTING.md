@@ -17,10 +17,10 @@ All changes you commit or submit by merge request should follow these simple gui
 * Separate subject from body with a blank line.
 * Use the imperative mood in the subject line.
 * Wrap lines at 72 characters if possible (E.g.: URLs are very hard to wrap).
-* Use the body to explain what and why you have done something. In most cases, you can leave out details about how a change has been made.
-
-Good commit message examples can be found [here](https://wiki.openstack.org/wiki/GitCommitMessages#Information_in_commit_messages).
-
+* Use the body to explain what and why you have done something. In most cases, you can leave out details about how a change has been made ( Good commit message examples can be found [here](https://wiki.openstack.org/wiki/GitCommitMessages#Information_in_commit_messages).)
+* Your merge request title should contain WindowsPerf JIRA ticket, which is prefixed WPERF-. Note: our GitLab JIRA integration requires developers to add it.
+  * You can post your MR without JIRA ticket but we will require ticket number to merge.
+  * WindowsPerf JIRA tickets are in format: WPERF-[0-9]+.
 # Advice on merge requests
 
 * Applying the single responsibility principle to merge requests is always a good idea. Try not to include some additional stuff into the merge request. For example, do not fix any typos other than your current context or do not add a tiny bug fix to a feature.
