@@ -35,10 +35,10 @@ using WPAPlugin.Events;
 namespace WPAPlugin
 {
     public class WperfCustomDataProcessorWithSourceParser
-        : CustomDataProcessorWithSourceParser<CountingEvent, WperfSourceParser, string>
+        : CustomDataProcessorWithSourceParser<WperfEvent, WperfSourceParser, string>
     {
         internal WperfCustomDataProcessorWithSourceParser(
-            ISourceParser<CountingEvent, WperfSourceParser, string> sourceParser,
+            ISourceParser<WperfEvent, WperfSourceParser, string> sourceParser,
             ProcessorOptions options,
             IApplicationEnvironment applicationEnvironment,
             IProcessorEnvironment processorEnvironment

@@ -32,13 +32,13 @@ using Microsoft.Performance.SDK;
 
 namespace WPAPlugin.Events
 {
-    public class CountingEventWithRelativeTimestamp : CountingEvent
+    public class WperfEventWithRelativeTimestamp : WperfEvent
     {
         public Timestamp RelativeStartTimestamp { get; private set; }
         public Timestamp RelativeEndTimestamp { get; private set; }
 
-        public CountingEventWithRelativeTimestamp(
-            CountingEvent countingEvent,
+        public WperfEventWithRelativeTimestamp(
+            WperfEvent countingEvent,
             Timestamp relativeStartTimestamp,
             Timestamp relativeEndTimestamp
         )

@@ -40,7 +40,7 @@ using WPAPlugin.Events;
 
 namespace WPAPlugin.DataCookers
 {
-    public class WperfTimelineDataCooker
+    public class WperfTelemetryDataCooker
         : SourceDataCooker<WperfEvent, WperfSourceParser, string>
     {
         private readonly List<WperfEventWithRelativeTimestamp> wperfEventWithRelativeTimestamps;
@@ -48,8 +48,8 @@ namespace WPAPlugin.DataCookers
         [DataOutput]
         public IReadOnlyList<WperfEventWithRelativeTimestamp> WperfEventWithRelativeTimestamps { get; }
 
-        public WperfTimelineDataCooker()
-            : base(WperfPluginConstants.CookerPath)
+        public WperfTelemetryDataCooker()
+            : base(WperfPluginConstants.TelemetryCookerPath)
         {
             wperfEventWithRelativeTimestamps = new List<WperfEventWithRelativeTimestamp>();
             WperfEventWithRelativeTimestamps =
@@ -58,11 +58,11 @@ namespace WPAPlugin.DataCookers
                 );
         }
 
-        public override string Description => "Adds relative timestamps to counting events";
+        public override string Description => "Adds relative timestamps to telemetry events";
 
         public override ReadOnlyHashSet<string> DataKeys =>
             new ReadOnlyHashSet<string>(
-                new HashSet<string> { WperfPluginConstants.PerformanceCounterTimelineEventKey }
+                new HashSet<string> { WperfPluginConstants.TelemetryEventKey }
             );
 
         public override DataProcessingResult CookDataElement(

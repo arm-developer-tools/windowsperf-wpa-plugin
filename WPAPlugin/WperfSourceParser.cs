@@ -38,11 +38,10 @@ using System.Threading;
 using WPAPlugin.Constants;
 using WPAPlugin.Events;
 using WPAPlugin.Parsers;
-using WPAPlugin.Utils;
 
 namespace WPAPlugin
 {
-    public class WperfSourceParser : ISourceParser<CountingEvent, WperfSourceParser, string>
+    public class WperfSourceParser : ISourceParser<WperfEvent, WperfSourceParser, string>
     {
         private readonly string[] timelineFilesPathList;
         private readonly string[] countFilesPathList;
@@ -54,7 +53,7 @@ namespace WPAPlugin
         }
 
         public DataSourceInfo DataSourceInfo { get; private set; }
-        public Type DataElementType => typeof(CountingEvent);
+        public Type DataElementType => typeof(WperfEvent);
 
         public Type DataContextType => typeof(WperfSourceParser);
 
@@ -75,7 +74,7 @@ namespace WPAPlugin
         }
 
         private void ProcessTimelineFiles(
-            ISourceDataProcessor<CountingEvent, WperfSourceParser, string> dataProcessor,
+            ISourceDataProcessor<WperfEvent, WperfSourceParser, string> dataProcessor,
             IProgress<int> progress,
             CancellationToken cancellationToken,
             int totalFiles
@@ -112,6 +111,32 @@ namespace WPAPlugin
                     }
                     totalTimeElapsed += count.TimeElapsed;
 
+                    if (count.Core.TsMetric.TelemetrySolutionMetrics != null)
+                    {
+
+                        foreach (TelemetrySolutionMetric metric in count.Core.TsMetric.TelemetrySolutionMetrics)
+                        {
+
+
+                            WperfEvent countingEvent = new WperfEvent
+                            {
+                                CoreNumber = Int32.Parse(metric.Core),
+                                Name = metric.MetricName,
+                                ProductName = metric.ProductName,
+                                Value = double.Parse(metric.Value),
+                                Unit = metric.Unit,
+                                Key = WperfPluginConstants.TelemetryEventKey,
+                                StartTime = previousTimeElapsed,
+                                EndTime = totalTimeElapsed,
+                            };
+                            _ = dataProcessor.ProcessDataElement(
+                                countingEvent,
+                                this,
+                                cancellationToken
+                            );
+                        }
+                    }
+
                     foreach (CorePerformanceCounter core in count.Core.PerformanceCounters)
                     {
                         int eventCount = core.PerformanceCounter.Length;
@@ -120,33 +145,36 @@ namespace WPAPlugin
                             CorePerformanceCounterItem rawCountingEvent in core.PerformanceCounter
                         )
                         {
-                            CountingEvent countingEvent = new CountingEvent(
-                                WperfPluginConstants.PerformanceCounterTimelineEventKey,
-                                core.CoreNumber,
-                                rawCountingEvent.CounterValue,
-                                rawCountingEvent.EventName,
-                                rawCountingEvent.EventIdx,
-                                rawCountingEvent.EventNote,
-                                previousTimeElapsed,
-                                totalTimeElapsed
-                            );
+                            WperfEvent countingEvent = new WperfEvent
+                            {
+                                CoreNumber = core.CoreNumber,
+                                Value = rawCountingEvent.CounterValue,
+                                Name = rawCountingEvent.EventName,
+                                Index = rawCountingEvent.EventIdx,
+                                Note = rawCountingEvent.EventNote,
+                                Key = WperfPluginConstants.PerformanceCounterTimelineEventKey,
+                                StartTime = previousTimeElapsed,
+                                EndTime = totalTimeElapsed,
+                            };
                             _ = dataProcessor.ProcessDataElement(
                                 countingEvent,
                                 this,
                                 cancellationToken
                             );
-                            progress.Report(
-                                Calc.CalculateProgress(
-                                    currentFile,
-                                    currentCore,
-                                    currentEvent,
-                                    currentCount,
-                                    filesCount,
-                                    coreCount,
-                                    eventCount,
-                                    totalCount
-                                ) * (totalFiles / filesCount)
-                            );
+                            // TODO : reeanble progress reporting once all parsing is implemented
+
+                            //progress.Report(
+                            //    Calc.CalculateProgress(
+                            //        currentFile,
+                            //        currentCore,
+                            //        currentEvent,
+                            //        currentCount,
+                            //        filesCount,
+                            //        coreCount,
+                            //        eventCount,
+                            //        totalCount
+                            //    ) * (totalFiles / filesCount)
+                            //);
                             currentEvent++;
                         }
                         currentCore++;
@@ -169,7 +197,7 @@ namespace WPAPlugin
         }
 
         private void ProcessCountFiles(
-            ISourceDataProcessor<CountingEvent, WperfSourceParser, string> dataProcessor,
+            ISourceDataProcessor<WperfEvent, WperfSourceParser, string> dataProcessor,
             IProgress<int> progress,
             CancellationToken cancellationToken,
             int totalFiles
@@ -191,37 +219,66 @@ namespace WPAPlugin
                 int coreCount = wperfTimeline.Core.PerformanceCounters.Length;
                 int currentCore = 0;
 
+
+
+                if (wperfTimeline.Core.TsMetric.TelemetrySolutionMetrics != null)
+                {
+
+                    foreach (var metric in wperfTimeline.Core.TsMetric.TelemetrySolutionMetrics)
+                    {
+
+                        WperfEvent countingEvent = new WperfEvent
+                        {
+                            CoreNumber = Int32.Parse(metric.Core),
+                            Name = metric.MetricName,
+                            ProductName = metric.ProductName,
+                            Value = double.Parse(metric.Value),
+                            Unit = metric.Unit,
+                            Key = WperfPluginConstants.TelemetryEventKey
+                        };
+                        _ = dataProcessor.ProcessDataElement(
+                            countingEvent,
+                            this,
+                            cancellationToken
+                        );
+
+                    }
+                }
+
                 foreach (CorePerformanceCounter core in wperfTimeline.Core.PerformanceCounters)
                 {
                     int eventCount = core.PerformanceCounter.Length;
                     int currentEvent = 0;
                     foreach (CorePerformanceCounterItem rawCountingEvent in core.PerformanceCounter)
                     {
-                        CountingEvent countingEvent = new CountingEvent(
-                            WperfPluginConstants.PerformanceCounterEventKey,
-                            core.CoreNumber,
-                            rawCountingEvent.CounterValue,
-                            rawCountingEvent.EventName,
-                            rawCountingEvent.EventIdx,
-                            rawCountingEvent.EventNote
-                        );
+                        WperfEvent countingEvent = new WperfEvent
+                        {
+                            CoreNumber = core.CoreNumber,
+                            Value = rawCountingEvent.CounterValue,
+                            Name = rawCountingEvent.EventName,
+                            Index = rawCountingEvent.EventIdx,
+                            Note = rawCountingEvent.EventNote,
+                            Key = WperfPluginConstants.PerformanceCounterEventKey
+                        };
                         _ = dataProcessor.ProcessDataElement(
                             countingEvent,
                             this,
                             cancellationToken
                         );
-                        progress.Report(
-                            Calc.CalculateProgress(
-                                currentFile,
-                                currentCore,
-                                currentEvent,
-                                1,
-                                filesCount,
-                                coreCount,
-                                eventCount,
-                                1
-                            ) * (totalFiles / filesCount)
-                        );
+                        // TODO : reeanble progress reporting once all parsing is implemented
+
+                        //progress.Report(
+                        //    Calc.CalculateProgress(
+                        //        currentFile,
+                        //        currentCore,
+                        //        currentEvent,
+                        //        1,
+                        //        filesCount,
+                        //        coreCount,
+                        //        eventCount,
+                        //        1
+                        //    ) * (totalFiles / filesCount)
+                        //);
                         currentEvent++;
                     }
                     currentCore++;
@@ -231,7 +288,7 @@ namespace WPAPlugin
         }
 
         public void ProcessSource(
-            ISourceDataProcessor<CountingEvent, WperfSourceParser, string> dataProcessor,
+            ISourceDataProcessor<WperfEvent, WperfSourceParser, string> dataProcessor,
             ILogger logger,
             IProgress<int> progress,
             CancellationToken cancellationToken

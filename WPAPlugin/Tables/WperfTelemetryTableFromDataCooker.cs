@@ -40,26 +40,26 @@ using WPAPlugin.Events;
 namespace WPAPlugin.Tables
 {
     [Table]
-    public static class WperfTimelineTableFromDataCooker
+    public static class WperfTelemetryTableFromDataCooker
     {
         public static TableDescriptor TableDescriptor =>
             new TableDescriptor(
-                Guid.Parse("{E732B8E4-4D69-48D7-848D-79C796DC6E25}"),
-                "Timeline events from Data Cooker",
-                "Timeline events parsed from wperf JSON output",
-                requiredDataCookers: new List<DataCookerPath> { WperfPluginConstants.CookerPath }
+                Guid.Parse("{F116F7E5-FBED-46F7-B1BD-AC034CAE3544}"),
+                "Telemetry events from Data Cooker",
+                "Telemetry events parsed from wperf JSON output",
+                requiredDataCookers: new List<DataCookerPath> { WperfPluginConstants.TelemetryCookerPath }
             );
 
         private static readonly ColumnConfiguration CoreColumn = new ColumnConfiguration(
             new ColumnMetadata(
-                new Guid("{00289B0C-F228-4A1F-BE23-95DA254FF69F}"),
+                new Guid("{241FD1F7-0DA2-427A-836E-15FE5D2FFD74}"),
                 "Core",
                 "Core Number"
             )
         );
         private static readonly ColumnConfiguration ValueColumn = new ColumnConfiguration(
             new ColumnMetadata(
-                new Guid("{6D49D34B-CBEA-4446-88D8-484D361672CF}"),
+                new Guid("{E0D38242-EAEF-4CCC-B6C6-EEB196C35843}"),
                 "Value",
                 "Value Number"
             ),
@@ -68,29 +68,29 @@ namespace WPAPlugin.Tables
 
         private static readonly ColumnConfiguration EventNameColumn = new ColumnConfiguration(
             new ColumnMetadata(
-                new Guid("{0B8AC083-D8F6-40B5-9151-3B03C14316F9}"),
+                new Guid("{46E84068-2734-45ED-BF13-C66AA0C73184}"),
                 "Name",
                 "Event Name"
             )
         );
-        private static readonly ColumnConfiguration EventIndexColumn = new ColumnConfiguration(
+        private static readonly ColumnConfiguration UnitColumn = new ColumnConfiguration(
             new ColumnMetadata(
-                new Guid("{9CD484D9-47E0-48A4-9555-BDD2D396B247}"),
-                "Index",
-                "Event Index"
+                new Guid("{682D6D47-5908-4E93-8AED-4F69153E663D}"),
+                "Unit",
+                "Telemetry Unit"
             )
         );
-        private static readonly ColumnConfiguration EventNoteColumn = new ColumnConfiguration(
+        private static readonly ColumnConfiguration ProductNameColumn = new ColumnConfiguration(
             new ColumnMetadata(
-                new Guid("{5EAF2668-EBAF-4D76-B63D-C3AFB0EC89D9}"),
-                "Note",
-                "Event Note"
+                new Guid("{5E1F7E50-3D54-445E-A1C8-34E4185F1DC8}"),
+                "Product Name",
+                "Telemtry Product Name"
             )
         );
         private static readonly ColumnConfiguration RelativeStartTimestampColumn =
             new ColumnConfiguration(
                 new ColumnMetadata(
-                    new Guid("{0426DAE2-D30C-46BB-BBC8-0E0B3F68E95E}"),
+                    new Guid("{DEA2ECAD-EC75-41EF-A318-650FE02A1330}"),
                     "Start",
                     "Start Time"
                 )
@@ -99,7 +99,7 @@ namespace WPAPlugin.Tables
         private static readonly ColumnConfiguration RelativeEndTimestampColumn =
             new ColumnConfiguration(
                 new ColumnMetadata(
-                    new Guid("{8FB5D961-8486-46E5-91F1-66BB4E1B82B9}"),
+                    new Guid("{32AF3CE1-B97C-49F2-A1F9-EB1450EAB326}"),
                     "End",
                     "End Time"
                 )
@@ -111,7 +111,7 @@ namespace WPAPlugin.Tables
                 IReadOnlyList<WperfEventWithRelativeTimestamp>
             >(
                 new DataOutputPath(
-                    WperfPluginConstants.CookerPath,
+                    WperfPluginConstants.TelemetryCookerPath,
                     nameof(WperfTimelineDataCooker.WperfEventWithRelativeTimestamps)
                 )
             );
@@ -122,8 +122,8 @@ namespace WPAPlugin.Tables
             IProjection<int, int> coreProjection = baseProjection.Compose(el => el.CoreNumber);
             IProjection<int, string> nameProjection = baseProjection.Compose(el => el.Name);
             IProjection<int, double> valueProjection = baseProjection.Compose(el => el.Value);
-            IProjection<int, string> indexProjection = baseProjection.Compose(el => el.Index);
-            IProjection<int, string> noteProjection = baseProjection.Compose(el => el.Note);
+            IProjection<int, string> productNameProjection = baseProjection.Compose(el => el.ProductName);
+            IProjection<int, string> unitProjection = baseProjection.Compose(el => el.Unit);
             IProjection<int, Timestamp> relativeStartTimeProjection = baseProjection.Compose(
                 el => el.RelativeStartTimestamp
             );
@@ -138,7 +138,8 @@ namespace WPAPlugin.Tables
                     CoreColumn,
                     EventNameColumn,
                     TableConfiguration.PivotColumn,
-                    EventNoteColumn,
+                    UnitColumn,
+                    ProductNameColumn,
                     RelativeStartTimestampColumn,
                     RelativeEndTimestampColumn,
                     TableConfiguration.GraphColumn,
@@ -153,7 +154,8 @@ namespace WPAPlugin.Tables
                     EventNameColumn,
                     CoreColumn,
                     TableConfiguration.PivotColumn,
-                    EventNoteColumn,
+                    UnitColumn,
+                    ProductNameColumn,
                     RelativeStartTimestampColumn,
                     RelativeEndTimestampColumn,
                     TableConfiguration.GraphColumn,
@@ -175,8 +177,8 @@ namespace WPAPlugin.Tables
                 .AddColumn(CoreColumn, coreProjection)
                 .AddColumn(EventNameColumn, nameProjection)
                 .AddColumn(ValueColumn, valueProjection)
-                .AddColumn(EventIndexColumn, indexProjection)
-                .AddColumn(EventNoteColumn, noteProjection)
+                .AddColumn(UnitColumn, unitProjection)
+                .AddColumn(ProductNameColumn, productNameProjection)
                 .AddColumn(RelativeStartTimestampColumn, relativeStartTimeProjection)
                 .AddColumn(RelativeEndTimestampColumn, relativeEndTimeProjection);
         }

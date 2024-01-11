@@ -94,21 +94,21 @@ namespace WPAPlugin.Tables
 
         public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval tableData)
         {
-            IReadOnlyList<CountingEvent> lineItems = tableData.QueryOutput<
-                IReadOnlyList<CountingEvent>
+            IReadOnlyList<WperfEvent> lineItems = tableData.QueryOutput<
+                IReadOnlyList<WperfEvent>
             >(
                 new DataOutputPath(
                     WperfPluginConstants.CountCookerPath,
-                    nameof(WperfCountDataCooker.CountingEvents)
+                    nameof(WperfCountDataCooker.WperfEvents)
                 )
             );
 
-            IProjection<int, CountingEvent> baseProjection = Projection.Index(lineItems);
+            IProjection<int, WperfEvent> baseProjection = Projection.Index(lineItems);
             IProjection<int, int> coreProjection = baseProjection.Compose(el => el.CoreNumber);
-            IProjection<int, string> nameProjection = baseProjection.Compose(el => el.EventName);
-            IProjection<int, long> valueProjection = baseProjection.Compose(el => el.Value);
-            IProjection<int, string> indexProjection = baseProjection.Compose(el => el.EventIndex);
-            IProjection<int, string> noteProjection = baseProjection.Compose(el => el.EventNote);
+            IProjection<int, string> nameProjection = baseProjection.Compose(el => el.Name);
+            IProjection<int, double> valueProjection = baseProjection.Compose(el => el.Value);
+            IProjection<int, string> indexProjection = baseProjection.Compose(el => el.Index);
+            IProjection<int, string> noteProjection = baseProjection.Compose(el => el.Note);
 
             TableConfiguration groupByCoreConfig = new TableConfiguration("Group by core")
             {

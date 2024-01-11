@@ -172,7 +172,6 @@ namespace WPAPlugin.Parsers
     {
         [JsonProperty(
             "telemetry_solution_metrics",
-            Required = Required.DisallowNull,
             NullValueHandling = NullValueHandling.Ignore
         )]
         public TelemetrySolutionMetric[] TelemetrySolutionMetrics { get; set; }

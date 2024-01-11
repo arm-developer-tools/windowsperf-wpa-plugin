@@ -28,52 +28,48 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility;
-using Microsoft.Performance.SDK.Extensibility.DataCooking;
-using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Threading;
-using WPAPlugin.Constants;
-using WPAPlugin.Events;
 
-namespace WPAPlugin.DataCookers
+namespace WPAPlugin.Events
 {
-    public class WperfCountDataCooker : SourceDataCooker<WperfEvent, WperfSourceParser, string>
+    public class WperfEvent : IKeyedDataType<string>
     {
-        private readonly List<WperfEvent> wperfEvents;
+        // Common fields
+        public int CoreNumber { get; set; }
+        public double Value { get; set; }
+        public string Name { get; set; }
+        public double StartTime { get; set; }
+        public double EndTime { get; set; }
+        public string Key { get; set; }
 
-        [DataOutput]
-        public IReadOnlyList<WperfEvent> WperfEvents { get; }
+        // Counting fields
+        public string Index { get; set; }
+        public string Note { get; set; }
 
-        public WperfCountDataCooker()
-            : base(WperfPluginConstants.CountCookerPath)
+        // Telemetry Fields
+        public string Unit { get; set; }
+        public string ProductName { get; set; }
+
+
+        public WperfEvent() { }
+
+        public WperfEvent(WperfEvent countingEvent)
         {
-            wperfEvents = new List<WperfEvent>();
-            WperfEvents = new ReadOnlyCollection<WperfEvent>(wperfEvents);
+            CoreNumber = countingEvent.CoreNumber;
+            Value = countingEvent.Value;
+            Name = countingEvent.Name;
+            StartTime = countingEvent.StartTime;
+            EndTime = countingEvent.EndTime;
+            Key = countingEvent.Key;
+            Index = countingEvent.Index;
+            Note = countingEvent.Note;
+            Unit = countingEvent.Unit;
+            ProductName = countingEvent.ProductName;
         }
 
-        public override string Description => "Passes on the counting data as is";
-
-        public override ReadOnlyHashSet<string> DataKeys =>
-            new ReadOnlyHashSet<string>(
-                new HashSet<string>
-                {
-                    WperfPluginConstants.PerformanceCounterEventKey,
-                    WperfPluginConstants.PerformanceCounterTimelineEventKey
-                }
-            );
-
-        public override DataProcessingResult CookDataElement(
-            WperfEvent data,
-            WperfSourceParser context,
-            CancellationToken cancellationToken
-        )
+        public string GetKey()
         {
-            wperfEvents.Add(data);
-
-            return DataProcessingResult.Processed;
+            return Key;
         }
     }
 }
