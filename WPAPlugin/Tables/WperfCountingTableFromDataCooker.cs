@@ -43,27 +43,26 @@ namespace WPAPlugin.Tables
     {
         public static TableDescriptor TableDescriptor =>
             new TableDescriptor(
-                Guid.Parse("{ACA62B99-CFA1-4EF1-A7B8-F062DB7F9CDC}"),
-                "Counting events from Data Cooker",
-                "Counting events parsed from wperf JSON output",
+                Guid.NewGuid(),
+                "Counting",
+                "Counting parsed from wperf JSON output",
                 requiredDataCookers: new List<DataCookerPath>
                 {
-                    WperfPluginConstants.CountCookerPath,
-                    WperfPluginConstants.CookerPath,
+                    WperfPluginConstants.CountCookerPath
                 },
                 defaultLayout: TableLayoutStyle.Table
             );
 
         private static readonly ColumnConfiguration CoreColumn = new ColumnConfiguration(
             new ColumnMetadata(
-                new Guid("{CE1BDEB8-2ABB-40EF-B25D-050DA9019E72}"),
+                Guid.NewGuid(),
                 "Core",
                 "Core Number"
             )
         );
         private static readonly ColumnConfiguration ValueColumn = new ColumnConfiguration(
             new ColumnMetadata(
-                new Guid("{97DE569F-A852-4477-A492-478920E7EA1C}"),
+                Guid.NewGuid(),
                 "Value",
                 "Value Number"
             ),
@@ -72,21 +71,21 @@ namespace WPAPlugin.Tables
 
         private static readonly ColumnConfiguration EventNameColumn = new ColumnConfiguration(
             new ColumnMetadata(
-                new Guid("{6A5C3BFD-1508-4A2D-9C4F-511ACB873D88}"),
+                Guid.NewGuid(),
                 "Name",
                 "Event Name"
             )
         );
         private static readonly ColumnConfiguration EventIndexColumn = new ColumnConfiguration(
             new ColumnMetadata(
-                new Guid("{9269C1B2-EA58-46A1-A77F-1A598B720E02}"),
+                Guid.NewGuid(),
                 "Index",
                 "Event Index"
             )
         );
         private static readonly ColumnConfiguration EventNoteColumn = new ColumnConfiguration(
             new ColumnMetadata(
-                new Guid("{8EC9FC7D-BD6D-4C14-B763-72BA4A5BC22D}"),
+                Guid.NewGuid(),
                 "Note",
                 "Event Note"
             )

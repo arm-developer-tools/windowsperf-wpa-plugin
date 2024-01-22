@@ -47,6 +47,8 @@ namespace WPAPlugin.Constants
         public const string CountCookerId = "WperfCountDataCooker";
         public const string TelemetryCookerId = "WperfTelemetryCooker";
 
+        public static readonly string[] WperfPresetMetrics = { "MPKI", "per TLB access", "per branch", "per cache access", "per cycle", "percent of cycles", "percent of operations", "percent of slots" };
+
         // Cooker Paths
         public static readonly DataCookerPath CookerPath = DataCookerPath.ForSource(
             ParserId,

@@ -44,22 +44,23 @@ namespace WPAPlugin.Tables
     {
         public static TableDescriptor TableDescriptor =>
             new TableDescriptor(
-                Guid.Parse("{E732B8E4-4D69-48D7-848D-79C796DC6E25}"),
-                "Timeline events from Data Cooker",
-                "Timeline events parsed from wperf JSON output",
-                requiredDataCookers: new List<DataCookerPath> { WperfPluginConstants.CookerPath }
+                Guid.NewGuid(),
+                "Counting timeline",
+                "Counting timeline parsed from wperf JSON output",
+                requiredDataCookers: new List<DataCookerPath> { WperfPluginConstants.CookerPath },
+                defaultLayout: TableLayoutStyle.Graph
             );
 
         private static readonly ColumnConfiguration CoreColumn = new ColumnConfiguration(
             new ColumnMetadata(
-                new Guid("{00289B0C-F228-4A1F-BE23-95DA254FF69F}"),
+                Guid.NewGuid(),
                 "Core",
                 "Core Number"
             )
         );
         private static readonly ColumnConfiguration ValueColumn = new ColumnConfiguration(
             new ColumnMetadata(
-                new Guid("{6D49D34B-CBEA-4446-88D8-484D361672CF}"),
+                Guid.NewGuid(),
                 "Value",
                 "Value Number"
             ),
@@ -68,21 +69,21 @@ namespace WPAPlugin.Tables
 
         private static readonly ColumnConfiguration EventNameColumn = new ColumnConfiguration(
             new ColumnMetadata(
-                new Guid("{0B8AC083-D8F6-40B5-9151-3B03C14316F9}"),
+                Guid.NewGuid(),
                 "Name",
                 "Event Name"
             )
         );
         private static readonly ColumnConfiguration EventIndexColumn = new ColumnConfiguration(
             new ColumnMetadata(
-                new Guid("{9CD484D9-47E0-48A4-9555-BDD2D396B247}"),
+                Guid.NewGuid(),
                 "Index",
                 "Event Index"
             )
         );
         private static readonly ColumnConfiguration EventNoteColumn = new ColumnConfiguration(
             new ColumnMetadata(
-                new Guid("{5EAF2668-EBAF-4D76-B63D-C3AFB0EC89D9}"),
+                Guid.NewGuid(),
                 "Note",
                 "Event Note"
             )
@@ -90,7 +91,7 @@ namespace WPAPlugin.Tables
         private static readonly ColumnConfiguration RelativeStartTimestampColumn =
             new ColumnConfiguration(
                 new ColumnMetadata(
-                    new Guid("{0426DAE2-D30C-46BB-BBC8-0E0B3F68E95E}"),
+                    Guid.NewGuid(),
                     "Start",
                     "Start Time"
                 )
@@ -99,7 +100,7 @@ namespace WPAPlugin.Tables
         private static readonly ColumnConfiguration RelativeEndTimestampColumn =
             new ColumnConfiguration(
                 new ColumnMetadata(
-                    new Guid("{8FB5D961-8486-46E5-91F1-66BB4E1B82B9}"),
+                    Guid.NewGuid(),
                     "End",
                     "End Time"
                 )

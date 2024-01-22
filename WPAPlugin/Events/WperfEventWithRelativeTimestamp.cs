@@ -37,6 +37,8 @@ namespace WPAPlugin.Events
         public Timestamp RelativeStartTimestamp { get; private set; }
         public Timestamp RelativeEndTimestamp { get; private set; }
 
+        public WperfEventWithRelativeTimestamp() : base() { }
+
         public WperfEventWithRelativeTimestamp(
             WperfEvent countingEvent,
             Timestamp relativeStartTimestamp,

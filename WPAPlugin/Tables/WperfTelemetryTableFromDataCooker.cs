@@ -33,6 +33,7 @@ using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using WPAPlugin.Constants;
 using WPAPlugin.DataCookers;
 using WPAPlugin.Events;
@@ -45,79 +46,99 @@ namespace WPAPlugin.Tables
         public static TableDescriptor TableDescriptor =>
             new TableDescriptor(
                 Guid.Parse("{F116F7E5-FBED-46F7-B1BD-AC034CAE3544}"),
-                "Telemetry events from Data Cooker",
-                "Telemetry events parsed from wperf JSON output",
-                requiredDataCookers: new List<DataCookerPath> { WperfPluginConstants.TelemetryCookerPath }
+                "Telemetry timeline",
+                "Telemetry timeline parsed from wperf JSON output",
+                requiredDataCookers: new List<DataCookerPath> { WperfPluginConstants.TelemetryCookerPath },
+                defaultLayout: TableLayoutStyle.Graph
             );
 
-        private static readonly ColumnConfiguration CoreColumn = new ColumnConfiguration(
-            new ColumnMetadata(
-                new Guid("{241FD1F7-0DA2-427A-836E-15FE5D2FFD74}"),
-                "Core",
-                "Core Number"
-            )
-        );
-        private static readonly ColumnConfiguration ValueColumn = new ColumnConfiguration(
-            new ColumnMetadata(
-                new Guid("{E0D38242-EAEF-4CCC-B6C6-EEB196C35843}"),
-                "Value",
-                "Value Number"
-            ),
-            new UIHints { AggregationMode = AggregationMode.Sum }
-        );
 
-        private static readonly ColumnConfiguration EventNameColumn = new ColumnConfiguration(
-            new ColumnMetadata(
-                new Guid("{46E84068-2734-45ED-BF13-C66AA0C73184}"),
-                "Name",
-                "Event Name"
-            )
-        );
-        private static readonly ColumnConfiguration UnitColumn = new ColumnConfiguration(
-            new ColumnMetadata(
-                new Guid("{682D6D47-5908-4E93-8AED-4F69153E663D}"),
-                "Unit",
-                "Telemetry Unit"
-            )
-        );
-        private static readonly ColumnConfiguration ProductNameColumn = new ColumnConfiguration(
-            new ColumnMetadata(
-                new Guid("{5E1F7E50-3D54-445E-A1C8-34E4185F1DC8}"),
-                "Product Name",
-                "Telemtry Product Name"
-            )
-        );
-        private static readonly ColumnConfiguration RelativeStartTimestampColumn =
-            new ColumnConfiguration(
-                new ColumnMetadata(
-                    new Guid("{DEA2ECAD-EC75-41EF-A318-650FE02A1330}"),
-                    "Start",
-                    "Start Time"
-                )
-            );
-
-        private static readonly ColumnConfiguration RelativeEndTimestampColumn =
-            new ColumnConfiguration(
-                new ColumnMetadata(
-                    new Guid("{32AF3CE1-B97C-49F2-A1F9-EB1450EAB326}"),
-                    "End",
-                    "End Time"
-                )
-            );
-
-        public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval tableData)
+        private static string GenerateColumnName(string key, string name)
         {
-            IReadOnlyList<WperfEventWithRelativeTimestamp> lineItems = tableData.QueryOutput<
-                IReadOnlyList<WperfEventWithRelativeTimestamp>
-            >(
-                new DataOutputPath(
-                    WperfPluginConstants.TelemetryCookerPath,
-                    nameof(WperfTimelineDataCooker.WperfEventWithRelativeTimestamps)
+            return $"{name} ({key})";
+        }
+
+        private static void BuildTableFilteredByKey(string key, IReadOnlyList<WperfEventWithRelativeTimestamp> lineItems, ITableBuilder tableBuilder)
+        {
+
+            var filteredLineItems = lineItems.Where(x => x.Unit == key).ToList();
+
+            if (filteredLineItems.Count == 0)
+            {
+                return;
+            }
+
+            List<WperfEventWithRelativeTimestamp> filledList = new List<WperfEventWithRelativeTimestamp>();
+
+            for (int i = 0; i < lineItems.Count; ++i)
+            {
+                if (i < filteredLineItems.Count)
+                {
+                    filledList.Add(filteredLineItems[i]);
+                }
+                else
+                {
+                    filledList.Add(new WperfEventWithRelativeTimestamp());
+                }
+            }
+
+            ColumnConfiguration CoreColumn = new ColumnConfiguration(
+                new ColumnMetadata(
+                    Guid.NewGuid(),
+                    GenerateColumnName(key, "Core"),
+                    "Core Number"
                 )
             );
+            ColumnConfiguration ValueColumn = new ColumnConfiguration(
+                new ColumnMetadata(
+                    Guid.NewGuid(),
+                    GenerateColumnName(key, "Value"),
+                    "Value Number"
+                ),
+                new UIHints { AggregationMode = AggregationMode.Sum }
+            );
+
+            ColumnConfiguration EventNameColumn = new ColumnConfiguration(
+                new ColumnMetadata(
+                    Guid.NewGuid(),
+                    GenerateColumnName(key, "Name"),
+                    "Event Name"
+                )
+            );
+            ColumnConfiguration UnitColumn = new ColumnConfiguration(
+                new ColumnMetadata(
+                    Guid.NewGuid(),
+                    GenerateColumnName(key, "Unit"),
+                    "Telemetry Unit"
+                )
+            );
+            ColumnConfiguration ProductNameColumn = new ColumnConfiguration(
+                new ColumnMetadata(
+                    Guid.NewGuid(),
+                    GenerateColumnName(key, "Product Name"),
+                    "Telemtry Product Name"
+                )
+            );
+            ColumnConfiguration RelativeStartTimestampColumn =
+                new ColumnConfiguration(
+                    new ColumnMetadata(
+                        Guid.NewGuid(),
+                        GenerateColumnName(key, "Start"),
+                        "Start Time"
+                    )
+                );
+
+            ColumnConfiguration RelativeEndTimestampColumn =
+                new ColumnConfiguration(
+                    new ColumnMetadata(
+                        Guid.NewGuid(),
+                        GenerateColumnName(key, "End"),
+                        "End Time"
+                    )
+                );
 
             IProjection<int, WperfEventWithRelativeTimestamp> baseProjection = Projection.Index(
-                lineItems
+                filledList
             );
             IProjection<int, int> coreProjection = baseProjection.Compose(el => el.CoreNumber);
             IProjection<int, string> nameProjection = baseProjection.Compose(el => el.Name);
@@ -130,24 +151,7 @@ namespace WPAPlugin.Tables
             IProjection<int, Timestamp> relativeEndTimeProjection = baseProjection.Compose(
                 el => el.RelativeEndTimestamp
             );
-
-            TableConfiguration groupByCoreConfig = new TableConfiguration("Group by core")
-            {
-                Columns = new[]
-                {
-                    CoreColumn,
-                    EventNameColumn,
-                    TableConfiguration.PivotColumn,
-                    UnitColumn,
-                    ProductNameColumn,
-                    RelativeStartTimestampColumn,
-                    RelativeEndTimestampColumn,
-                    TableConfiguration.GraphColumn,
-                    ValueColumn,
-                },
-            };
-
-            TableConfiguration groupByEventConfig = new TableConfiguration("Group by event")
+            TableConfiguration groupByEventConfig = new TableConfiguration(key)
             {
                 Columns = new[]
                 {
@@ -161,19 +165,17 @@ namespace WPAPlugin.Tables
                     TableConfiguration.GraphColumn,
                     ValueColumn,
                 },
+                InitialFilterShouldKeep = false,
+                InitialFilterQuery = $@"[{RelativeStartTimestampColumn.Metadata.Name}]:={"0"} AND [{RelativeEndTimestampColumn.Metadata.Name}]:={"0"}"
             };
 
-            groupByCoreConfig.AddColumnRole(ColumnRole.StartTime, RelativeStartTimestampColumn);
             groupByEventConfig.AddColumnRole(ColumnRole.StartTime, RelativeStartTimestampColumn);
-
-            groupByCoreConfig.AddColumnRole(ColumnRole.EndTime, RelativeEndTimestampColumn);
             groupByEventConfig.AddColumnRole(ColumnRole.EndTime, RelativeEndTimestampColumn);
 
             _ = tableBuilder
-                .AddTableConfiguration(groupByCoreConfig)
                 .AddTableConfiguration(groupByEventConfig)
                 .SetDefaultTableConfiguration(groupByEventConfig)
-                .SetRowCount(lineItems.Count)
+                .SetRowCount(filledList.Count)
                 .AddColumn(CoreColumn, coreProjection)
                 .AddColumn(EventNameColumn, nameProjection)
                 .AddColumn(ValueColumn, valueProjection)
@@ -181,6 +183,27 @@ namespace WPAPlugin.Tables
                 .AddColumn(ProductNameColumn, productNameProjection)
                 .AddColumn(RelativeStartTimestampColumn, relativeStartTimeProjection)
                 .AddColumn(RelativeEndTimestampColumn, relativeEndTimeProjection);
+        }
+
+        public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval tableData)
+        {
+            IReadOnlyList<WperfEventWithRelativeTimestamp> lineItems = tableData.QueryOutput<
+                IReadOnlyList<WperfEventWithRelativeTimestamp>
+            >(
+                new DataOutputPath(
+                    WperfPluginConstants.TelemetryCookerPath,
+                    nameof(WperfTimelineDataCooker.WperfEventWithRelativeTimestamps)
+                )
+            );
+
+
+            if (lineItems.Count == 0)
+                return;
+
+            foreach (string metric in WperfPluginConstants.WperfPresetMetrics)
+            {
+                BuildTableFilteredByKey(metric, lineItems, tableBuilder);
+            }
         }
     }
 }
