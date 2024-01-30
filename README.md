@@ -14,6 +14,45 @@ WPA is included in the Windows Assessment and Deployment Kit (Windows ADK) that 
 
 Once downloaded, make sure that "Windows Performance Toolkit" checkbox is checked under "Select the features you want to install".
 
-## Plugin (WIP)
+## Plugin
 
-**TODO: add plugin installation instructions**
+WPA-plugin is built on the [`microsoft-performance-toolkit-sdk`](https://github.com/microsoft/microsoft-performance-toolkit-sdk) and is shipped as a single
+`.dll` file.
+
+### Installation
+
+There are 2 different methods to install the plugin:
+
+- Moving the plugin dll to the WPA directory (defaults to `C:\\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit`).
+- Calling `wpa` from the command line and passing the plugin directory to the `-addsearchdir` flag (example : `wpa -addsearchdir "%USERPROFILE%\plugins"`).
+
+> To verify that the plugin is loaded successfully, launch WPA then the plugin should appear under Help > About Windows Performance Analyzer.
+
+
+### Usage
+ - Start a `wperf` counting job (example: `wperf stat -t -i 0 -m imix,l1d_cache_miss_ratio,l1d_cache_mpki,l1d_tlb_miss_ratio,l1d_tlb_mpki -e inst_spec,vfp_spec,ld_spec,st_spec -c 1 --json`).
+ - Save the output in a `.json` file.
+ - Import the file in WPA (File > Open...)
+
+
+ ## Project Structure
+
+```bash
+└───WPAPlugin
+    ├───Constants   (Contains constants used throughout the plugin)
+    ├───DataCookers (Contains the data cookers that converts events from their generic form to be consumable by the tables)
+    ├───Events      (Contains the events parsed from the source parser as well as the events cooked by the data cookers )
+    ├───Parsers     (Contains the json parsers based on Newtonsoft.Json)
+    ├───Schemas     (Contains the json validation schemas)
+    ├───Tables      (Contains the table definitions and configurations to be displayed in WPA)
+    └───Utils       (Contains utility functions and classes)
+```
+
+
+## Contributing
+
+To contribute to the project follow our [Contributing Guidelines](CONTRIBUTING.md).
+
+## License
+
+All code in this repository is licensed under the [BSD 3-Clause License](LICENSE).
