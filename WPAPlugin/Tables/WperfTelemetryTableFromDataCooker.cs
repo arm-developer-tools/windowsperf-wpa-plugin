@@ -45,7 +45,7 @@ namespace WPAPlugin.Tables
     {
         public static TableDescriptor TableDescriptor =>
             new TableDescriptor(
-                Guid.Parse("{F116F7E5-FBED-46F7-B1BD-AC034CAE3544}"),
+                Guid.NewGuid(),
                 "Telemetry timeline",
                 "Telemetry timeline parsed from wperf JSON output",
                 requiredDataCookers: new List<DataCookerPath> { WperfPluginConstants.TelemetryCookerPath },

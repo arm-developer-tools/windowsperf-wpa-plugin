@@ -35,7 +35,7 @@ There are 2 different methods to install the plugin:
  - Import the file in WPA (File > Open...)
 
 
- ## Project Structure
+## Project Structure
 
 ```bash
 └───WPAPlugin
@@ -47,7 +47,9 @@ There are 2 different methods to install the plugin:
     ├───Tables      (Contains the table definitions and configurations to be displayed in WPA)
     └───Utils       (Contains utility functions and classes)
 ```
+## Wiki page
 
+To get started with the project, see our [Wiki page](https://gitlab.com/Linaro/WindowsPerf/wpa-plugin/-/wikis/home).
 
 ## Contributing
 

@@ -41,7 +41,7 @@ namespace WPAPlugin
 {
     [ProcessingSource(
         "{05D8A372-EC56-43DE-83FF-02BDD9042727}",
-        "wperf Counting Data Source",
+        "WindowsPerf WPA Plugin",
         "Processes wperf counting trace files exported as JSON"
     )]
     [FileDataSource(".json", "JSON file output from wperf")]
