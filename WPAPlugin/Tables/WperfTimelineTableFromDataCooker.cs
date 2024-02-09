@@ -33,89 +33,83 @@ using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Processing;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using WPAPlugin.Constants;
 using WPAPlugin.DataCookers;
 using WPAPlugin.Events;
+using WPAPlugin.Utils;
 
 namespace WPAPlugin.Tables
 {
     [Table]
     public static class WperfTimelineTableFromDataCooker
     {
+
         public static TableDescriptor TableDescriptor =>
             new TableDescriptor(
                 Guid.NewGuid(),
                 "Counting timeline",
                 "Counting timeline parsed from wperf JSON output",
-                requiredDataCookers: new List<DataCookerPath> { WperfPluginConstants.CookerPath },
-                defaultLayout: TableLayoutStyle.Graph
+                requiredDataCookers: new List<DataCookerPath> { WperfPluginConstants.CookerPath }
             );
 
-        private static readonly ColumnConfiguration CoreColumn = new ColumnConfiguration(
-            new ColumnMetadata(
-                Guid.NewGuid(),
-                "Core",
-                "Core Number"
-            )
-        );
-        private static readonly ColumnConfiguration ValueColumn = new ColumnConfiguration(
-            new ColumnMetadata(
-                Guid.NewGuid(),
-                "Value",
-                "Value Number"
-            ),
-            new UIHints { AggregationMode = AggregationMode.Sum }
-        );
-
-        private static readonly ColumnConfiguration EventNameColumn = new ColumnConfiguration(
-            new ColumnMetadata(
-                Guid.NewGuid(),
-                "Name",
-                "Event Name"
-            )
-        );
-        private static readonly ColumnConfiguration EventIndexColumn = new ColumnConfiguration(
-            new ColumnMetadata(
-                Guid.NewGuid(),
-                "Index",
-                "Event Index"
-            )
-        );
-        private static readonly ColumnConfiguration EventNoteColumn = new ColumnConfiguration(
-            new ColumnMetadata(
-                Guid.NewGuid(),
-                "Note",
-                "Event Note"
-            )
-        );
-        private static readonly ColumnConfiguration RelativeStartTimestampColumn =
-            new ColumnConfiguration(
-                new ColumnMetadata(
-                    Guid.NewGuid(),
-                    "Start",
-                    "Start Time"
-                )
-            );
-
-        private static readonly ColumnConfiguration RelativeEndTimestampColumn =
-            new ColumnConfiguration(
-                new ColumnMetadata(
-                    Guid.NewGuid(),
-                    "End",
-                    "End Time"
-                )
-            );
-
-        public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval tableData)
+        public static void BuildCombinedTables(ITableBuilder tableBuilder, IReadOnlyList<WperfEventWithRelativeTimestamp> lineItems)
         {
-            IReadOnlyList<WperfEventWithRelativeTimestamp> lineItems = tableData.QueryOutput<
-                IReadOnlyList<WperfEventWithRelativeTimestamp>
-            >(
-                new DataOutputPath(
-                    WperfPluginConstants.CookerPath,
-                    nameof(WperfTimelineDataCooker.WperfEventWithRelativeTimestamps)
-                )
-            );
+            ColumnConfiguration CoreColumn = new ColumnConfiguration(
+               new ColumnMetadata(
+                   Guid.NewGuid(),
+                   "Core",
+                   "Core Number"
+               )
+           );
+            ColumnConfiguration ValueColumn = new ColumnConfiguration(
+               new ColumnMetadata(
+                   Guid.NewGuid(),
+                   "Value",
+                   "Value Number"
+               ),
+               new UIHints { AggregationMode = AggregationMode.Sum }
+           );
+
+            ColumnConfiguration EventNameColumn = new ColumnConfiguration(
+               new ColumnMetadata(
+                   Guid.NewGuid(),
+                   "Name",
+                   "Event Name"
+               )
+           );
+            ColumnConfiguration EventIndexColumn = new ColumnConfiguration(
+               new ColumnMetadata(
+                   Guid.NewGuid(),
+                   "Index",
+                   "Event Index"
+               )
+           );
+            ColumnConfiguration EventNoteColumn = new ColumnConfiguration(
+               new ColumnMetadata(
+                   Guid.NewGuid(),
+                   "Note",
+                   "Event Note"
+               )
+           );
+            ColumnConfiguration RelativeStartTimestampColumn =
+               new ColumnConfiguration(
+                   new ColumnMetadata(
+                       Guid.NewGuid(),
+                       "Start",
+                       "Start Time"
+                   )
+               );
+
+            ColumnConfiguration RelativeEndTimestampColumn =
+               new ColumnConfiguration(
+                   new ColumnMetadata(
+                       Guid.NewGuid(),
+                       "End",
+                       "End Time"
+                   )
+               );
+
 
             IProjection<int, WperfEventWithRelativeTimestamp> baseProjection = Projection.Index(
                 lineItems
@@ -180,6 +174,164 @@ namespace WPAPlugin.Tables
                 .AddColumn(EventNoteColumn, noteProjection)
                 .AddColumn(RelativeStartTimestampColumn, relativeStartTimeProjection)
                 .AddColumn(RelativeEndTimestampColumn, relativeEndTimeProjection);
+
+
+        }
+
+
+        public static void BuildGroupTable(string group, ITableBuilder tableBuilder, IReadOnlyList<WperfEventWithRelativeTimestamp> lineItems)
+        {
+
+            var filteredLineItems = lineItems.Where(x => x.Note == group).ToList();
+
+            if (filteredLineItems.Count == 0)
+            {
+                return;
+            }
+
+            List<WperfEventWithRelativeTimestamp> filledList = new List<WperfEventWithRelativeTimestamp>();
+
+            for (int i = 0; i < lineItems.Count; ++i)
+            {
+                if (i < filteredLineItems.Count)
+                {
+                    filledList.Add(filteredLineItems[i]);
+                }
+                else
+                {
+                    filledList.Add(new WperfEventWithRelativeTimestamp()
+                    {
+                        Name = "#PLACEHOLDER"
+                    });
+                }
+            }
+
+            ColumnConfiguration CoreColumn = new ColumnConfiguration(
+               new ColumnMetadata(
+                   Guid.NewGuid(),
+                    Helpers.GenerateColumnName(group, "Core"),
+                   "Core Number"
+               )
+           );
+            ColumnConfiguration ValueColumn = new ColumnConfiguration(
+               new ColumnMetadata(
+                   Guid.NewGuid(),
+                    Helpers.GenerateColumnName(group, "Value"),
+                   "Value Number"
+               ),
+               new UIHints { AggregationMode = AggregationMode.Sum }
+           );
+
+            ColumnConfiguration EventNameColumn = new ColumnConfiguration(
+               new ColumnMetadata(
+                   Guid.NewGuid(),
+                   Helpers.GenerateColumnName(group, "Name"),
+                   "Event Name"
+               )
+           );
+            ColumnConfiguration EventIndexColumn = new ColumnConfiguration(
+               new ColumnMetadata(
+                   Guid.NewGuid(),
+                   Helpers.GenerateColumnName(group, "Index"),
+                   "Event Index"
+               )
+           );
+            ColumnConfiguration EventNoteColumn = new ColumnConfiguration(
+               new ColumnMetadata(
+                   Guid.NewGuid(),
+                   Helpers.GenerateColumnName(group, "Note"),
+                   "Event Note"
+               )
+           );
+            ColumnConfiguration RelativeStartTimestampColumn =
+               new ColumnConfiguration(
+                   new ColumnMetadata(
+                       Guid.NewGuid(),
+                       Helpers.GenerateColumnName(group, "Start"),
+                       "Start Time"
+                   )
+               );
+
+            ColumnConfiguration RelativeEndTimestampColumn =
+               new ColumnConfiguration(
+                   new ColumnMetadata(
+                       Guid.NewGuid(),
+                       Helpers.GenerateColumnName(group, "End"),
+                       "End Time"
+                   )
+               );
+
+
+            IProjection<int, WperfEventWithRelativeTimestamp> baseProjection = Projection.Index(
+                filledList
+            );
+            IProjection<int, int> coreProjection = baseProjection.Compose(el => el.CoreNumber);
+            IProjection<int, string> nameProjection = baseProjection.Compose(el => el.Name);
+            IProjection<int, double> valueProjection = baseProjection.Compose(el => el.Value);
+            IProjection<int, string> indexProjection = baseProjection.Compose(el => el.Index);
+            IProjection<int, string> noteProjection = baseProjection.Compose(el => el.Note);
+            IProjection<int, Timestamp> relativeStartTimeProjection = baseProjection.Compose(
+                el => el.RelativeStartTimestamp
+            );
+            IProjection<int, Timestamp> relativeEndTimeProjection = baseProjection.Compose(
+                el => el.RelativeEndTimestamp
+            );
+
+
+            TableConfiguration groupByEventConfig = new TableConfiguration(group)
+            {
+                Columns = new[]
+                {
+                    EventNameColumn,
+                    CoreColumn,
+                    TableConfiguration.PivotColumn,
+                    EventNoteColumn,
+                    RelativeStartTimestampColumn,
+                    RelativeEndTimestampColumn,
+                    TableConfiguration.GraphColumn,
+                    ValueColumn,
+                },
+                InitialFilterShouldKeep = false,
+                InitialFilterQuery = $@"[{EventNameColumn.Metadata.Name}]:={"#PLACEHOLDER"}"
+            };
+
+            groupByEventConfig.AddColumnRole(ColumnRole.StartTime, RelativeStartTimestampColumn);
+            groupByEventConfig.AddColumnRole(ColumnRole.EndTime, RelativeEndTimestampColumn);
+
+            _ = tableBuilder
+                .AddTableConfiguration(groupByEventConfig)
+                .SetDefaultTableConfiguration(groupByEventConfig)
+                .SetRowCount(filledList.Count)
+                .AddColumn(CoreColumn, coreProjection)
+                .AddColumn(EventNameColumn, nameProjection)
+                .AddColumn(ValueColumn, valueProjection)
+                .AddColumn(EventIndexColumn, indexProjection)
+                .AddColumn(EventNoteColumn, noteProjection)
+                .AddColumn(RelativeStartTimestampColumn, relativeStartTimeProjection)
+                .AddColumn(RelativeEndTimestampColumn, relativeEndTimeProjection);
+
+        }
+
+        public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval tableData)
+        {
+            IReadOnlyList<WperfEventWithRelativeTimestamp> lineItems = tableData.QueryOutput<
+                IReadOnlyList<WperfEventWithRelativeTimestamp>
+            >(
+                new DataOutputPath(
+                    WperfPluginConstants.CookerPath,
+                    nameof(WperfTimelineDataCooker.WperfEventWithRelativeTimestamps)
+                )
+            );
+
+
+            var groupList = lineItems.Select(el => el.Note).Distinct().ToList();
+
+            foreach (var group in groupList)
+            {
+                BuildGroupTable(group, tableBuilder, lineItems);
+            }
+
+            BuildCombinedTables(tableBuilder, lineItems);
         }
     }
 }

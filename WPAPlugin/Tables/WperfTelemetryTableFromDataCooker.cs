@@ -1,4 +1,4 @@
-﻿// BSD 3-Clause License
+﻿﻿// BSD 3-Clause License
 //
 // Copyright (c) 2022, Arm Limited
 // All rights reserved.
@@ -37,6 +37,7 @@ using System.Linq;
 using WPAPlugin.Constants;
 using WPAPlugin.DataCookers;
 using WPAPlugin.Events;
+using WPAPlugin.Utils;
 
 namespace WPAPlugin.Tables
 {
@@ -45,7 +46,7 @@ namespace WPAPlugin.Tables
     {
         public static TableDescriptor TableDescriptor =>
             new TableDescriptor(
-                Guid.NewGuid(),
+                Guid.Parse("{F116F7E5-FBED-46F7-B1BD-AC034CAE3544}"),
                 "Telemetry timeline",
                 "Telemetry timeline parsed from wperf JSON output",
                 requiredDataCookers: new List<DataCookerPath> { WperfPluginConstants.TelemetryCookerPath },
@@ -53,10 +54,6 @@ namespace WPAPlugin.Tables
             );
 
 
-        private static string GenerateColumnName(string key, string name)
-        {
-            return $"{name} ({key})";
-        }
 
         private static void BuildTableFilteredByKey(string key, IReadOnlyList<WperfEventWithRelativeTimestamp> lineItems, ITableBuilder tableBuilder)
         {
@@ -85,14 +82,14 @@ namespace WPAPlugin.Tables
             ColumnConfiguration CoreColumn = new ColumnConfiguration(
                 new ColumnMetadata(
                     Guid.NewGuid(),
-                    GenerateColumnName(key, "Core"),
+                    Helpers.GenerateColumnName(key, "Core"),
                     "Core Number"
                 )
             );
             ColumnConfiguration ValueColumn = new ColumnConfiguration(
                 new ColumnMetadata(
                     Guid.NewGuid(),
-                    GenerateColumnName(key, "Value"),
+                    Helpers.GenerateColumnName(key, "Value"),
                     "Value Number"
                 ),
                 new UIHints { AggregationMode = AggregationMode.Sum }
@@ -101,21 +98,21 @@ namespace WPAPlugin.Tables
             ColumnConfiguration EventNameColumn = new ColumnConfiguration(
                 new ColumnMetadata(
                     Guid.NewGuid(),
-                    GenerateColumnName(key, "Name"),
+                    Helpers.GenerateColumnName(key, "Name"),
                     "Event Name"
                 )
             );
             ColumnConfiguration UnitColumn = new ColumnConfiguration(
                 new ColumnMetadata(
                     Guid.NewGuid(),
-                    GenerateColumnName(key, "Unit"),
+                    Helpers.GenerateColumnName(key, "Unit"),
                     "Telemetry Unit"
                 )
             );
             ColumnConfiguration ProductNameColumn = new ColumnConfiguration(
                 new ColumnMetadata(
                     Guid.NewGuid(),
-                    GenerateColumnName(key, "Product Name"),
+                    Helpers.GenerateColumnName(key, "Product Name"),
                     "Telemtry Product Name"
                 )
             );
@@ -123,7 +120,7 @@ namespace WPAPlugin.Tables
                 new ColumnConfiguration(
                     new ColumnMetadata(
                         Guid.NewGuid(),
-                        GenerateColumnName(key, "Start"),
+                        Helpers.GenerateColumnName(key, "Start"),
                         "Start Time"
                     )
                 );
@@ -132,7 +129,7 @@ namespace WPAPlugin.Tables
                 new ColumnConfiguration(
                     new ColumnMetadata(
                         Guid.NewGuid(),
-                        GenerateColumnName(key, "End"),
+                        Helpers.GenerateColumnName(key, "End"),
                         "End Time"
                     )
                 );
