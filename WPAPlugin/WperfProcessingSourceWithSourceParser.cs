@@ -29,13 +29,12 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-using Json.Schema;
 using Microsoft.Performance.SDK.Processing;
+using NJsonSchema;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.Json.Nodes;
 
 namespace WPAPlugin
 {
@@ -100,14 +99,25 @@ namespace WPAPlugin
             );
         }
 
+
+        private static Dictionary<(string, string), bool> validationCache = new Dictionary<(string, string), bool>();
+
+
         private static bool ValidateJson(string sourcePath, string schemaName)
         {
+            (string, string) cacheKey = (sourcePath, schemaName);
+            if (validationCache.ContainsKey(cacheKey))
+            {
+                return validationCache[cacheKey];
+            }
             string schemaPath = Path.Combine(Environment.CurrentDirectory, "Schemas", schemaName);
-            string schemaContent = File.ReadAllText(schemaPath);
-            JsonSchema schema = JsonSchema.FromText(schemaContent);
-            string jsonContent = File.ReadAllText(sourcePath);
-            JsonNode json = JsonNode.Parse(jsonContent);
-            return schema.Evaluate(json).IsValid;
+            var schema = JsonSchema.FromFileAsync(schemaPath).Result;
+            var jsonContent = File.ReadAllText(sourcePath);
+            var errors = schema.Validate(jsonContent);
+
+            bool isValid = errors.Count == 0;
+            validationCache.Add(cacheKey, isValid);
+            return isValid;
         }
 
         protected override bool IsDataSourceSupportedCore(IDataSource source)

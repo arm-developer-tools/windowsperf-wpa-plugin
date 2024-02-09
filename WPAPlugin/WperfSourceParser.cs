@@ -161,20 +161,6 @@ namespace WPAPlugin
                                 this,
                                 cancellationToken
                             );
-                            // TODO : reeanble progress reporting once all parsing is implemented
-
-                            //progress.Report(
-                            //    Calc.CalculateProgress(
-                            //        currentFile,
-                            //        currentCore,
-                            //        currentEvent,
-                            //        currentCount,
-                            //        filesCount,
-                            //        coreCount,
-                            //        eventCount,
-                            //        totalCount
-                            //    ) * (totalFiles / filesCount)
-                            //);
                             currentEvent++;
                         }
                         currentCore++;
@@ -265,20 +251,6 @@ namespace WPAPlugin
                             this,
                             cancellationToken
                         );
-                        // TODO : reeanble progress reporting once all parsing is implemented
-
-                        //progress.Report(
-                        //    Calc.CalculateProgress(
-                        //        currentFile,
-                        //        currentCore,
-                        //        currentEvent,
-                        //        1,
-                        //        filesCount,
-                        //        coreCount,
-                        //        eventCount,
-                        //        1
-                        //    ) * (totalFiles / filesCount)
-                        //);
                         currentEvent++;
                     }
                     currentCore++;
