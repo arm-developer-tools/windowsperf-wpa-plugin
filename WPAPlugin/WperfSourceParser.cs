@@ -41,11 +41,20 @@ using WPAPlugin.Parsers;
 
 namespace WPAPlugin
 {
+    /// <summary>
+    /// Class responsible of reading the input json content and emitting <see cref="WperfEvent"/> instances
+    /// to be processed by the data cookers.
+    /// </summary>
     public class WperfSourceParser : ISourceParser<WperfEvent, WperfSourceParser, string>
     {
         private readonly string[] timelineFilesPathList;
         private readonly string[] countFilesPathList;
 
+        /// <summary>
+        /// Timeline and count files paths lists need to be passed seperately to the <c>constructor</c> 
+        /// </summary>
+        /// <param name="timelineFilesPathList">List of timeline file paths</param>
+        /// <param name="countFilesPathList">List of single count file paths</param>
         public WperfSourceParser(string[] timelineFilesPathList, string[] countFilesPathList)
         {
             this.timelineFilesPathList = timelineFilesPathList;
@@ -73,11 +82,15 @@ namespace WPAPlugin
             // NOOP
         }
 
+        /// <summary>
+        /// Parses content of timeline json file.
+        /// </summary>
+        /// <param name="dataProcessor">Instance of the data processors passed from <c>ProcessSource</c> used to
+        /// mark events as ready for process.</param>
+        /// <param name="cancellationToken">Cancellation token required to be passed to the data cooker</param>
         private void ProcessTimelineFiles(
             ISourceDataProcessor<WperfEvent, WperfSourceParser, string> dataProcessor,
-            IProgress<int> progress,
-            CancellationToken cancellationToken,
-            int totalFiles
+            CancellationToken cancellationToken
         )
         {
             int filesCount = timelineFilesPathList.Length;
@@ -182,11 +195,15 @@ namespace WPAPlugin
             ;
         }
 
+        /// <summary>
+        /// Parses content of single count json file.
+        /// </summary>
+        /// <param name="dataProcessor">Instance of the data processors passed from <c>ProcessSource</c> used to
+        /// mark events as ready for process.</param>
+        /// <param name="cancellationToken">Cancellation token required to be passed to the data cooker</param>
         private void ProcessCountFiles(
             ISourceDataProcessor<WperfEvent, WperfSourceParser, string> dataProcessor,
-            IProgress<int> progress,
-            CancellationToken cancellationToken,
-            int totalFiles
+            CancellationToken cancellationToken
         )
         {
             int filesCount = countFilesPathList.Length;
@@ -266,9 +283,8 @@ namespace WPAPlugin
             CancellationToken cancellationToken
         )
         {
-            int totalFiles = countFilesPathList.Length + timelineFilesPathList.Length;
-            ProcessTimelineFiles(dataProcessor, progress, cancellationToken, totalFiles);
-            ProcessCountFiles(dataProcessor, progress, cancellationToken, totalFiles);
+            ProcessTimelineFiles(dataProcessor, cancellationToken);
+            ProcessCountFiles(dataProcessor, cancellationToken);
         }
     }
 }
