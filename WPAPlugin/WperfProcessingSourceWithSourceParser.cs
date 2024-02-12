@@ -31,10 +31,10 @@
 
 using Microsoft.Performance.SDK.Processing;
 using NJsonSchema;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using WPAPlugin.Schemas;
 
 namespace WPAPlugin
 {
@@ -104,17 +104,16 @@ namespace WPAPlugin
         private static Dictionary<(string, string), bool> validationCache = new Dictionary<(string, string), bool>();
 
 
-        private static bool ValidateJson(string sourcePath, string schemaName)
+        private static bool ValidateJson(string sourcePath, JsonSchemas.Schemas schema)
         {
-            (string, string) cacheKey = (sourcePath, schemaName);
+            (string, string) cacheKey = (sourcePath, schema.ToString());
             if (validationCache.ContainsKey(cacheKey))
             {
                 return validationCache[cacheKey];
             }
-            string schemaPath = Path.Combine(Environment.CurrentDirectory, "Schemas", schemaName);
-            var schema = JsonSchema.FromFileAsync(schemaPath).Result;
+            var parsedSchema = JsonSchema.FromSampleJson(JsonSchemas.GetSchemaByKey(schema));
             var jsonContent = File.ReadAllText(sourcePath);
-            var errors = schema.Validate(jsonContent);
+            var errors = parsedSchema.Validate(jsonContent);
 
             bool isValid = errors.Count == 0;
             validationCache.Add(cacheKey, isValid);
@@ -124,7 +123,7 @@ namespace WPAPlugin
         protected override bool IsDataSourceSupportedCore(IDataSource source)
         {
             string sourcePath = source.Uri.LocalPath;
-            bool isValidTimeline = ValidateJson(sourcePath, "wperf-timeline.stat.schema");
+            bool isValidTimeline = ValidateJson(sourcePath, JsonSchemas.Schemas.TimelineSchema);
             bool isValidCount = false;
 
             if (isValidTimeline)
@@ -133,7 +132,7 @@ namespace WPAPlugin
             }
             else
             {
-                isValidCount = ValidateJson(sourcePath, "wperf.stat.schema");
+                isValidCount = ValidateJson(sourcePath, JsonSchemas.Schemas.CountSchema);
                 if (isValidCount)
                 {
                     _ = countingPathList.Add(sourcePath);
