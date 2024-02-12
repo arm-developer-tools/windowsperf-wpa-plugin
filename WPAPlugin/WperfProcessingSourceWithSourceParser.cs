@@ -52,7 +52,7 @@ namespace WPAPlugin
         {
             return new ProcessingSourceInfo
             {
-                CopyrightNotice = "Copyright 2021 Microsoft Corporation. All Rights Reserved.",
+                CopyrightNotice = "Linaro.org 2024",
                 LicenseInfo = new LicenseInfo
                 {
                     Name = "BSD 3-Clause License",
@@ -63,7 +63,8 @@ namespace WPAPlugin
                 {
                     new ContactInfo
                     {
-                        // TODO: add appropriate contact information
+                        Name = "Alaaeddine Chakroun",
+                        EmailAddresses = new[]{ "alaaeddine.chakroun@daydevs.com" }
                     },
                 },
                 ProjectInfo = new ProjectInfo

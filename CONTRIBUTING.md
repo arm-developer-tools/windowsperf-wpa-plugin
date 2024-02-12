@@ -37,7 +37,11 @@ All changes you commit or submit by merge request should follow these simple gui
 
 # Testing your changes
 
-TODO
+As of right now, unit and integration testing are not implemented in this project, so any
+contribution related to tests would be appreciated.
+
+Before submitting a patch please make sure that the project builds correctly,
+and that the plotted graphs match the examples in the [Wiki](https://gitlab.com/Linaro/WindowsPerf/wpa-plugin/-/wikis/Tables)
 
 # Reporting Bugs
 
