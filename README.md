@@ -23,7 +23,8 @@ WPA-plugin is built on the [`microsoft-performance-toolkit-sdk`](https://github.
 
 There are 2 different methods to install the plugin:
 
-- Moving the plugin dll to the WPA directory (defaults to `C:\\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit`).
+- Moving the plugin dll to the **CustomDataSources** directory next
+to the WPA executable (defaults to `C:\\Program Files (x86)\Windows Kits\10\Windows Performance Toolkit\CustomDataSources`).
 - Calling `wpa` from the command line and passing the plugin directory to the `-addsearchdir` flag (example : `wpa -addsearchdir "%USERPROFILE%\plugins"`).
 
 > To verify that the plugin is loaded successfully, launch WPA then the plugin should appear under Help > About Windows Performance Analyzer.
