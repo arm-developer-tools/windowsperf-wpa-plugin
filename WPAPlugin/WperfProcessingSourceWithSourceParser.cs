@@ -29,11 +29,11 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-using Microsoft.Performance.SDK.Processing;
-using NJsonSchema;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.Performance.SDK.Processing;
+using NJsonSchema;
 using WPAPlugin.Schemas;
 
 namespace WPAPlugin
@@ -64,7 +64,7 @@ namespace WPAPlugin
                     new ContactInfo
                     {
                         Name = "Alaaeddine Chakroun",
-                        EmailAddresses = new[]{ "alaaeddine.chakroun@daydevs.com" }
+                        EmailAddresses = new[] { "alaaeddine.chakroun@daydevs.com" }
                     },
                 },
                 ProjectInfo = new ProjectInfo
@@ -92,6 +92,7 @@ namespace WPAPlugin
 
             timelinePathList.Clear();
             countingPathList.Clear();
+            validationCache.Clear();
             return new WperfCustomDataProcessorWithSourceParser(
                 parser,
                 options,
@@ -100,9 +101,8 @@ namespace WPAPlugin
             );
         }
 
-
-        private static Dictionary<(string, string), bool> validationCache = new Dictionary<(string, string), bool>();
-
+        private static Dictionary<(string, string), bool> validationCache =
+            new Dictionary<(string, string), bool>();
 
         private static bool ValidateJson(string sourcePath, JsonSchemas.Schemas schema)
         {
@@ -111,7 +111,8 @@ namespace WPAPlugin
             {
                 return validationCache[cacheKey];
             }
-            var parsedSchema = JsonSchema.FromSampleJson(JsonSchemas.GetSchemaByKey(schema));
+            var selectedSchema = JsonSchemas.GetSchemaByKey(schema);
+            var parsedSchema = JsonSchema.FromJsonAsync(selectedSchema).Result;
             var jsonContent = File.ReadAllText(sourcePath);
             var errors = parsedSchema.Validate(jsonContent);
 
