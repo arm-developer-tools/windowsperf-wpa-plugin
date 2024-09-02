@@ -1,0 +1,19 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/microsoft-performance-toolkit-sdk/main/src/PluginsSystem/Tools/Microsoft.Performance.Toolkit.Plugins.Cli/Manifest/PluginManifestSchema.json",
+  "identity": {
+    "id": "wpa-plugin",
+    "version": "1.0.0"
+  },
+  "displayName": "WindowsPerf WPA Plugin",
+  "description": "WindowsPerf WPA plugin to interpret ETW output from WindowsPerf",
+  "owners": [
+    {
+      "name": "Arm Ltd",
+      "address": "",
+      "emailAddresses": [ "alaaeddine.chakroun@daydevs.com" ],
+      "phoneNumbers": [ "" ]
+    }
+  ],
+  "projectUrl": "https://gitlab.com/Linaro/WindowsPerf/wpa-plugin",
+  "manifestVersion": 1.0
+}

@@ -52,7 +52,7 @@ namespace WPAPlugin
         {
             return new ProcessingSourceInfo
             {
-                CopyrightNotice = "Linaro.org 2024",
+                CopyrightNotice = "Arm Ltd 2024",
                 LicenseInfo = new LicenseInfo
                 {
                     Name = "BSD 3-Clause License",
