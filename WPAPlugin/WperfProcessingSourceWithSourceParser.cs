@@ -57,7 +57,7 @@ namespace WPAPlugin
                 {
                     Name = "BSD 3-Clause License",
                     Text = "Please see the link for the full license text.",
-                    Uri = "https://gitlab.com/Linaro/WindowsPerf/wpa-plugin/-/blob/main/LICENSE",
+                    Uri = "https://github.com/arm-developer-tools/windowsperf-wpa-plugin/blob/main/README.md",
                 },
                 Owners = new[]
                 {
@@ -69,7 +69,7 @@ namespace WPAPlugin
                 },
                 ProjectInfo = new ProjectInfo
                 {
-                    Uri = "https://gitlab.com/Linaro/WindowsPerf/wpa-plugin",
+                    Uri = "https://github.com/arm-developer-tools/windowsperf-wpa-plugin",
                 },
             };
         }
