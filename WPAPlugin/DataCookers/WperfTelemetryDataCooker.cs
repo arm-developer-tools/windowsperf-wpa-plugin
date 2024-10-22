@@ -41,7 +41,7 @@ using WPAPlugin.Events;
 namespace WPAPlugin.DataCookers
 {
     /// <summary>
-    /// WperfTelemetryDataCookeris a SourceDataCooker that adds the relative start and end time to the counting WperfEvents.
+    /// WperfTelemetryDataCooker is a SourceDataCooker that adds the relative start and end time to the counting WperfEvents.
     /// </summary>
     public class WperfTelemetryDataCooker : SourceDataCooker<WperfEvent, WperfSourceParser, string>
     {

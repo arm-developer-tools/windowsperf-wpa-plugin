@@ -60,6 +60,9 @@ namespace WPAPlugin.Constants
 
         // Cooker IDs
 
+        /// <summary>
+        /// Constant string identifier of WperfTimelineDataCooker
+        /// </summary>
         public const string TimelineCookerId = "WperfDataCooker";
 
         /// <summary>
