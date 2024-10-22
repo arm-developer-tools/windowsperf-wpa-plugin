@@ -32,12 +32,23 @@ using Microsoft.Performance.SDK;
 
 namespace WPAPlugin.Events
 {
+    /// <summary>
+    /// WperfEventWithRelativeTimestamp is a that  class inherits from the WperfEvent class in and adds a start and end timestamp relative to the first event.
+    /// </summary>
     public class WperfEventWithRelativeTimestamp : WperfEvent
     {
+        /// <summary>
+        /// Timestamp representing the start time relative to the first event.
+        /// </summary>
         public Timestamp RelativeStartTimestamp { get; private set; }
+
+        /// <summary>
+        /// Timestamp representing the end time relative to the first event.
+        /// </summary>
         public Timestamp RelativeEndTimestamp { get; private set; }
 
-        public WperfEventWithRelativeTimestamp() : base() { }
+        public WperfEventWithRelativeTimestamp()
+            : base() { }
 
         public WperfEventWithRelativeTimestamp(
             WperfEvent countingEvent,
