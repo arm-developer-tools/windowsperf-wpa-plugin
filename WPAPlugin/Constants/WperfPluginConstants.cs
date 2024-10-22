@@ -35,19 +35,46 @@ namespace WPAPlugin.Constants
     public static class WperfPluginConstants
     {
         // Event Identifiers used by Data cookers
+
+
+        /// <summary>
+        /// constant added to counting events parsed from a single count .json input file.
+        /// </summary>
         public const string PerformanceCounterEventKey = "PerformanceCounterEvent";
+
+        /// <summary>
+        ///  WperfPluginConstants.PerformanceCounterTimelineEventKey: constant added to counting events parsed from a timeline count .json input file.
+        /// </summary>
         public const string PerformanceCounterTimelineEventKey = "PerformanceCounterTimelineEvent";
         public const string TelemetryEventKey = "TelemetryEvent";
 
         // Parser ID (There should be no reason to have multiple parsers as of now)
+        /// <summary>
+        /// Constant string identifier of WperfSourceParser
+        /// </summary>
         public const string ParserId = "WperfSourceParser";
 
         // Cooker IDs
+
         public const string TimelineCookerId = "WperfDataCooker";
+
+        /// <summary>
+        /// Constant string identifier of WperfCountDataCooker
+        /// </summary>
         public const string CountCookerId = "WperfCountDataCooker";
         public const string TelemetryCookerId = "WperfTelemetryCooker";
 
-        public static readonly string[] WperfPresetMetrics = { "MPKI", "per TLB access", "per branch", "per cache access", "per cycle", "percent of cycles", "percent of operations", "percent of slots" };
+        public static readonly string[] WperfPresetMetrics =
+        {
+            "MPKI",
+            "per TLB access",
+            "per branch",
+            "per cache access",
+            "per cycle",
+            "percent of cycles",
+            "percent of operations",
+            "percent of slots"
+        };
 
         // Cooker Paths
         public static readonly DataCookerPath CookerPath = DataCookerPath.ForSource(
@@ -55,6 +82,9 @@ namespace WPAPlugin.Constants
             TimelineCookerId
         );
 
+        /// <summary>
+        /// In order for the events processd by the DataCooker to be consumed by the tables, each DataCooker requires declaring a path that maps itself with the appropriate DataSource.
+        /// </summary>
         public static readonly DataCookerPath CountCookerPath = DataCookerPath.ForSource(
             ParserId,
             CountCookerId
