@@ -28,11 +28,11 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using Microsoft.Performance.SDK.Extensibility;
-using Microsoft.Performance.SDK.Processing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Performance.SDK.Extensibility;
+using Microsoft.Performance.SDK.Processing;
 using WPAPlugin.Constants;
 using WPAPlugin.DataCookers;
 using WPAPlugin.Events;
@@ -40,9 +40,31 @@ using WPAPlugin.Utils;
 
 namespace WPAPlugin.Tables
 {
+    /// <summary>
+    /// WperfCountingTableFromDataCooker is a simple WPA table that shows counting events from a single wperf count.
+    /// This table, by default, offers 2 views, to either group the events by event name, or by core.
+    /// </summary>
     [Table]
     public static class WperfCountingTableFromDataCooker
     {
+        /// <summary>
+        /// WperfCountingTableFromDataCooker queries the output data of WperfCountDataCooker by specifying the cooker's path as a requiredDataCookers in the TableDescriptor.
+        /// </summary>
+        /// <example>
+        /// <code>
+        ///  public static TableDescriptor TableDescriptor =>
+        ///    new TableDescriptor(
+        ///        Guid.NewGuid(),
+        ///        "Counting",
+        ///        "Counting parsed from wperf JSON output",
+        ///        requiredDataCookers: new List<DataCookerPath>
+        ///        {
+        ///            WperfPluginConstants.CountCookerPath
+        ///        },
+        ///        defaultLayout: TableLayoutStyle.Table
+        ///    );
+        /// </code>
+        /// </example>
         public static TableDescriptor TableDescriptor =>
             new TableDescriptor(
                 Guid.NewGuid(),
@@ -55,49 +77,28 @@ namespace WPAPlugin.Tables
                 defaultLayout: TableLayoutStyle.Table
             );
 
-
-
-        public static void BuildCombinedTables(ITableBuilder tableBuilder, IReadOnlyList<WperfEvent> lineItems)
+        public static void BuildCombinedTables(
+            ITableBuilder tableBuilder,
+            IReadOnlyList<WperfEvent> lineItems
+        )
         {
-
             ColumnConfiguration CoreColumn = new ColumnConfiguration(
-                new ColumnMetadata(
-                    Guid.NewGuid(),
-                    "Core",
-                    "Core Number"
-                )
+                new ColumnMetadata(Guid.NewGuid(), "Core", "Core Number")
             );
             ColumnConfiguration ValueColumn = new ColumnConfiguration(
-                new ColumnMetadata(
-                    Guid.NewGuid(),
-                    "Value",
-                    "Value Number"
-                ),
+                new ColumnMetadata(Guid.NewGuid(), "Value", "Value Number"),
                 new UIHints { AggregationMode = AggregationMode.Sum }
             );
 
             ColumnConfiguration EventNameColumn = new ColumnConfiguration(
-               new ColumnMetadata(
-                   Guid.NewGuid(),
-                   "Name",
-                   "Event Name"
-               )
-           );
+                new ColumnMetadata(Guid.NewGuid(), "Name", "Event Name")
+            );
             ColumnConfiguration EventIndexColumn = new ColumnConfiguration(
-               new ColumnMetadata(
-                   Guid.NewGuid(),
-                   "Index",
-                   "Event Index"
-               )
-           );
+                new ColumnMetadata(Guid.NewGuid(), "Index", "Event Index")
+            );
             ColumnConfiguration EventNoteColumn = new ColumnConfiguration(
-               new ColumnMetadata(
-                   Guid.NewGuid(),
-                   "Note",
-                   "Event Note"
-               )
-           );
-
+                new ColumnMetadata(Guid.NewGuid(), "Note", "Event Note")
+            );
 
             IProjection<int, WperfEvent> baseProjection = Projection.Index(lineItems);
             IProjection<int, int> coreProjection = baseProjection.Compose(el => el.CoreNumber);
@@ -132,17 +133,21 @@ namespace WPAPlugin.Tables
 
             _ = tableBuilder
                 .AddTableConfiguration(groupByCoreConfig)
-                    .AddTableConfiguration(groupByEventConfig)
-                    .SetDefaultTableConfiguration(groupByEventConfig)
-                    .SetRowCount(lineItems.Count)
-                    .AddColumn(CoreColumn, coreProjection)
-                    .AddColumn(EventNameColumn, nameProjection)
-                    .AddColumn(ValueColumn, valueProjection)
-                    .AddColumn(EventIndexColumn, indexProjection)
-                    .AddColumn(EventNoteColumn, noteProjection);
+                .AddTableConfiguration(groupByEventConfig)
+                .SetDefaultTableConfiguration(groupByEventConfig)
+                .SetRowCount(lineItems.Count)
+                .AddColumn(CoreColumn, coreProjection)
+                .AddColumn(EventNameColumn, nameProjection)
+                .AddColumn(ValueColumn, valueProjection)
+                .AddColumn(EventIndexColumn, indexProjection)
+                .AddColumn(EventNoteColumn, noteProjection);
         }
 
-        public static void BuildGroupTable(string group, ITableBuilder tableBuilder, IReadOnlyList<WperfEvent> lineItems)
+        public static void BuildGroupTable(
+            string group,
+            ITableBuilder tableBuilder,
+            IReadOnlyList<WperfEvent> lineItems
+        )
         {
             var filteredLineItems = lineItems.Where(x => x.Note == group).ToList();
 
@@ -161,10 +166,7 @@ namespace WPAPlugin.Tables
                 }
                 else
                 {
-                    filledList.Add(new WperfEvent()
-                    {
-                        Name = "#PLACEHOLDER"
-                    });
+                    filledList.Add(new WperfEvent() { Name = "#PLACEHOLDER" });
                 }
             }
 
@@ -185,27 +187,26 @@ namespace WPAPlugin.Tables
             );
 
             ColumnConfiguration EventNameColumn = new ColumnConfiguration(
-               new ColumnMetadata(
-                   Guid.NewGuid(),
-                   Helpers.GenerateColumnName(group, "Name"),
-                   "Event Name"
-               )
-           );
+                new ColumnMetadata(
+                    Guid.NewGuid(),
+                    Helpers.GenerateColumnName(group, "Name"),
+                    "Event Name"
+                )
+            );
             ColumnConfiguration EventIndexColumn = new ColumnConfiguration(
-               new ColumnMetadata(
-                   Guid.NewGuid(),
-                   Helpers.GenerateColumnName(group, "Index"),
-                   "Event Index"
-               )
-           );
+                new ColumnMetadata(
+                    Guid.NewGuid(),
+                    Helpers.GenerateColumnName(group, "Index"),
+                    "Event Index"
+                )
+            );
             ColumnConfiguration EventNoteColumn = new ColumnConfiguration(
-               new ColumnMetadata(
-                   Guid.NewGuid(),
-                   Helpers.GenerateColumnName(group, "Note"),
-                   "Event Note"
-               )
-           );
-
+                new ColumnMetadata(
+                    Guid.NewGuid(),
+                    Helpers.GenerateColumnName(group, "Note"),
+                    "Event Note"
+                )
+            );
 
             IProjection<int, WperfEvent> baseProjection = Projection.Index(filledList);
             IProjection<int, int> coreProjection = baseProjection.Compose(el => el.CoreNumber);
@@ -213,7 +214,6 @@ namespace WPAPlugin.Tables
             IProjection<int, double> valueProjection = baseProjection.Compose(el => el.Value);
             IProjection<int, string> indexProjection = baseProjection.Compose(el => el.Index);
             IProjection<int, string> noteProjection = baseProjection.Compose(el => el.Note);
-
 
             TableConfiguration groupByEventConfig = new TableConfiguration(group)
             {
@@ -231,28 +231,24 @@ namespace WPAPlugin.Tables
             };
 
             _ = tableBuilder
-                    .AddTableConfiguration(groupByEventConfig)
-                    .SetDefaultTableConfiguration(groupByEventConfig)
-                    .SetRowCount(filledList.Count)
-                    .AddColumn(CoreColumn, coreProjection)
-                    .AddColumn(EventNameColumn, nameProjection)
-                    .AddColumn(ValueColumn, valueProjection)
-                    .AddColumn(EventIndexColumn, indexProjection)
-                    .AddColumn(EventNoteColumn, noteProjection);
+                .AddTableConfiguration(groupByEventConfig)
+                .SetDefaultTableConfiguration(groupByEventConfig)
+                .SetRowCount(filledList.Count)
+                .AddColumn(CoreColumn, coreProjection)
+                .AddColumn(EventNameColumn, nameProjection)
+                .AddColumn(ValueColumn, valueProjection)
+                .AddColumn(EventIndexColumn, indexProjection)
+                .AddColumn(EventNoteColumn, noteProjection);
         }
-
 
         public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval tableData)
         {
-            IReadOnlyList<WperfEvent> lineItems = tableData.QueryOutput<
-                IReadOnlyList<WperfEvent>
-            >(
+            IReadOnlyList<WperfEvent> lineItems = tableData.QueryOutput<IReadOnlyList<WperfEvent>>(
                 new DataOutputPath(
                     WperfPluginConstants.CountCookerPath,
                     nameof(WperfCountDataCooker.WperfEvents)
                 )
             );
-
 
             var groupList = lineItems.Select(el => el.Note).Distinct().ToList();
 
@@ -262,7 +258,6 @@ namespace WPAPlugin.Tables
             }
 
             BuildCombinedTables(tableBuilder, lineItems);
-
         }
     }
 }
