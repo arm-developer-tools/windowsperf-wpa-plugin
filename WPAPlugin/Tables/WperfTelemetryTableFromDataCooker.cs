@@ -1,4 +1,4 @@
-﻿﻿// BSD 3-Clause License
+﻿// BSD 3-Clause License
 //
 // Copyright (c) 2024, Arm Limited
 // All rights reserved.
@@ -28,12 +28,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using Microsoft.Performance.SDK;
-using Microsoft.Performance.SDK.Extensibility;
-using Microsoft.Performance.SDK.Processing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Performance.SDK;
+using Microsoft.Performance.SDK.Extensibility;
+using Microsoft.Performance.SDK.Processing;
 using WPAPlugin.Constants;
 using WPAPlugin.DataCookers;
 using WPAPlugin.Events;
@@ -41,23 +41,46 @@ using WPAPlugin.Utils;
 
 namespace WPAPlugin.Tables
 {
+    /// <summary>
+    /// WperfTelemetryTableFromDataCooker is a WPA table that shows telemetry events from a wperf telemetry timeline.
+    /// In order to be comparable, data is grouped by the telemetry unit and is a sub-graph is generated and displayed per unit.
+    /// </summary>
     [Table]
     public static class WperfTelemetryTableFromDataCooker
     {
+        /// <summary>
+        /// WperfTelemetryTableFromDataCooker queries the output data of WperfTimelineDataCooker by specifying the cooker's path as a requiredDataCookers in the TableDescriptor.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// public static TableDescriptor TableDescriptor =>
+        ///     new TableDescriptor(
+        ///         Guid.NewGuid(),
+        ///         "Telemetry timeline",
+        ///         "Telemetry timeline parsed from wperf JSON output",
+        ///         requiredDataCookers: new List<DataCookerPath> { WperfPluginConstants.TelemetryCookerPath },
+        ///         defaultLayout: TableLayoutStyle.Graph
+        ///     );
+        /// </code>
+        /// </example>
         public static TableDescriptor TableDescriptor =>
             new TableDescriptor(
                 Guid.Parse("{F116F7E5-FBED-46F7-B1BD-AC034CAE3544}"),
                 "Telemetry timeline",
                 "Telemetry timeline parsed from wperf JSON output",
-                requiredDataCookers: new List<DataCookerPath> { WperfPluginConstants.TelemetryCookerPath },
+                requiredDataCookers: new List<DataCookerPath>
+                {
+                    WperfPluginConstants.TelemetryCookerPath
+                },
                 defaultLayout: TableLayoutStyle.Graph
             );
 
-
-
-        private static void BuildTableFilteredByKey(string key, IReadOnlyList<WperfEventWithRelativeTimestamp> lineItems, ITableBuilder tableBuilder)
+        private static void BuildTableFilteredByKey(
+            string key,
+            IReadOnlyList<WperfEventWithRelativeTimestamp> lineItems,
+            ITableBuilder tableBuilder
+        )
         {
-
             var filteredLineItems = lineItems.Where(x => x.Unit == key).ToList();
 
             if (filteredLineItems.Count == 0)
@@ -65,7 +88,8 @@ namespace WPAPlugin.Tables
                 return;
             }
 
-            List<WperfEventWithRelativeTimestamp> filledList = new List<WperfEventWithRelativeTimestamp>();
+            List<WperfEventWithRelativeTimestamp> filledList =
+                new List<WperfEventWithRelativeTimestamp>();
 
             for (int i = 0; i < lineItems.Count; ++i)
             {
@@ -116,23 +140,21 @@ namespace WPAPlugin.Tables
                     "Telemtry Product Name"
                 )
             );
-            ColumnConfiguration RelativeStartTimestampColumn =
-                new ColumnConfiguration(
-                    new ColumnMetadata(
-                        Guid.NewGuid(),
-                        Helpers.GenerateColumnName(key, "Start"),
-                        "Start Time"
-                    )
-                );
+            ColumnConfiguration RelativeStartTimestampColumn = new ColumnConfiguration(
+                new ColumnMetadata(
+                    Guid.NewGuid(),
+                    Helpers.GenerateColumnName(key, "Start"),
+                    "Start Time"
+                )
+            );
 
-            ColumnConfiguration RelativeEndTimestampColumn =
-                new ColumnConfiguration(
-                    new ColumnMetadata(
-                        Guid.NewGuid(),
-                        Helpers.GenerateColumnName(key, "End"),
-                        "End Time"
-                    )
-                );
+            ColumnConfiguration RelativeEndTimestampColumn = new ColumnConfiguration(
+                new ColumnMetadata(
+                    Guid.NewGuid(),
+                    Helpers.GenerateColumnName(key, "End"),
+                    "End Time"
+                )
+            );
 
             IProjection<int, WperfEventWithRelativeTimestamp> baseProjection = Projection.Index(
                 filledList
@@ -140,13 +162,15 @@ namespace WPAPlugin.Tables
             IProjection<int, int> coreProjection = baseProjection.Compose(el => el.CoreNumber);
             IProjection<int, string> nameProjection = baseProjection.Compose(el => el.Name);
             IProjection<int, double> valueProjection = baseProjection.Compose(el => el.Value);
-            IProjection<int, string> productNameProjection = baseProjection.Compose(el => el.ProductName);
-            IProjection<int, string> unitProjection = baseProjection.Compose(el => el.Unit);
-            IProjection<int, Timestamp> relativeStartTimeProjection = baseProjection.Compose(
-                el => el.RelativeStartTimestamp
+            IProjection<int, string> productNameProjection = baseProjection.Compose(el =>
+                el.ProductName
             );
-            IProjection<int, Timestamp> relativeEndTimeProjection = baseProjection.Compose(
-                el => el.RelativeEndTimestamp
+            IProjection<int, string> unitProjection = baseProjection.Compose(el => el.Unit);
+            IProjection<int, Timestamp> relativeStartTimeProjection = baseProjection.Compose(el =>
+                el.RelativeStartTimestamp
+            );
+            IProjection<int, Timestamp> relativeEndTimeProjection = baseProjection.Compose(el =>
+                el.RelativeEndTimestamp
             );
             TableConfiguration groupByEventConfig = new TableConfiguration(key)
             {
@@ -163,7 +187,8 @@ namespace WPAPlugin.Tables
                     ValueColumn,
                 },
                 InitialFilterShouldKeep = false,
-                InitialFilterQuery = $@"[{RelativeStartTimestampColumn.Metadata.Name}]:={"0"} AND [{RelativeEndTimestampColumn.Metadata.Name}]:={"0"}"
+                InitialFilterQuery =
+                    $@"[{RelativeStartTimestampColumn.Metadata.Name}]:={"0"} AND [{RelativeEndTimestampColumn.Metadata.Name}]:={"0"}"
             };
 
             groupByEventConfig.AddColumnRole(ColumnRole.StartTime, RelativeStartTimestampColumn);
@@ -192,7 +217,6 @@ namespace WPAPlugin.Tables
                     nameof(WperfTimelineDataCooker.WperfEventWithRelativeTimestamps)
                 )
             );
-
 
             if (lineItems.Count == 0)
                 return;

@@ -28,13 +28,13 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using Microsoft.Performance.SDK;
-using Microsoft.Performance.SDK.Extensibility.SourceParsing;
-using Microsoft.Performance.SDK.Processing;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using Microsoft.Performance.SDK;
+using Microsoft.Performance.SDK.Extensibility.SourceParsing;
+using Microsoft.Performance.SDK.Processing;
 using WPAPlugin.Constants;
 using WPAPlugin.Events;
 using WPAPlugin.Parsers;
@@ -42,8 +42,8 @@ using WPAPlugin.Parsers;
 namespace WPAPlugin
 {
     /// <summary>
-    /// Class responsible of reading the input json content and emitting <see cref="WperfEvent"/> instances
-    /// to be processed by the data cookers.
+    /// WperfSourceParser is the class responsible of reading the content of the .json file and creating WperfEvent events.
+    /// These events are then marked as ready to be processed and passed to the DataCookers.
     /// </summary>
     public class WperfSourceParser : ISourceParser<WperfEvent, WperfSourceParser, string>
     {
@@ -51,7 +51,7 @@ namespace WPAPlugin
         private readonly string[] countFilesPathList;
 
         /// <summary>
-        /// Timeline and count files paths lists need to be passed seperately to the <c>constructor</c> 
+        /// Timeline and count files paths lists need to be passed seperately to the <c>constructor</c>
         /// </summary>
         /// <param name="timelineFilesPathList">List of timeline file paths</param>
         /// <param name="countFilesPathList">List of single count file paths</param>
@@ -72,6 +72,9 @@ namespace WPAPlugin
 
         public DateTime StartWallClockUtc { get; private set; }
 
+        /// <summary>
+        /// A SourceParser requires a string Id field that identifies the SourceParser and allows mapping a DataCooker with its respecitve data source.
+        /// </summary>
         public string Id => WperfPluginConstants.ParserId;
 
         public void PrepareForProcessing(
@@ -126,11 +129,13 @@ namespace WPAPlugin
 
                     if (count.Core.TsMetric.TelemetrySolutionMetrics != null)
                     {
-
-                        foreach (TelemetrySolutionMetric metric in count.Core.TsMetric.TelemetrySolutionMetrics)
+                        foreach (
+                            TelemetrySolutionMetric metric in count
+                                .Core
+                                .TsMetric
+                                .TelemetrySolutionMetrics
+                        )
                         {
-
-
                             WperfEvent countingEvent = new WperfEvent
                             {
                                 CoreNumber = Int32.Parse(metric.Core),
@@ -222,14 +227,10 @@ namespace WPAPlugin
                 int coreCount = wperfTimeline.Core.PerformanceCounters.Length;
                 int currentCore = 0;
 
-
-
                 if (wperfTimeline.Core.TsMetric.TelemetrySolutionMetrics != null)
                 {
-
                     foreach (var metric in wperfTimeline.Core.TsMetric.TelemetrySolutionMetrics)
                     {
-
                         WperfEvent countingEvent = new WperfEvent
                         {
                             CoreNumber = Int32.Parse(metric.Core),
@@ -244,7 +245,6 @@ namespace WPAPlugin
                             this,
                             cancellationToken
                         );
-
                     }
                 }
 
@@ -276,6 +276,33 @@ namespace WPAPlugin
             }
         }
 
+        /// <summary>
+        ///    A SourceParser requires a ProcessSource method to be one of its members, and is where the JSON parsing will occur.
+        ///
+        /// Parsed events should be instances of WperfEvent.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// public void ProcessSource(
+        ///         ISourceDataProcessor<WperfEvent, WperfSourceParser, string> dataProcessor,
+        ///         ILogger logger,
+        ///         IProgress<int> progress,
+        ///         CancellationToken cancellationToken
+        ///         )
+        /// {
+        ///     WperfEvent countingEvent = new WperfEvent(...)
+        ///
+        ///     ...
+        ///
+        ///     _ = dataProcessor.ProcessDataElement(
+        ///         countingEvent,
+        ///         this,
+        ///         cancellationToken
+        ///         );
+        ///
+        /// }
+        /// </code>
+        /// </example>
         public void ProcessSource(
             ISourceDataProcessor<WperfEvent, WperfSourceParser, string> dataProcessor,
             ILogger logger,

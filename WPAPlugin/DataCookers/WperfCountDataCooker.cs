@@ -28,22 +28,35 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Threading;
 using Microsoft.Performance.SDK;
 using Microsoft.Performance.SDK.Extensibility;
 using Microsoft.Performance.SDK.Extensibility.DataCooking;
 using Microsoft.Performance.SDK.Extensibility.DataCooking.SourceDataCooking;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Threading;
 using WPAPlugin.Constants;
 using WPAPlugin.Events;
 
 namespace WPAPlugin.DataCookers
 {
+    /// <summary>
+    /// WperfCountDataCooker is a SourceDataCooker that passes the counting WperfEvents as is.
+    /// </summary>
     public class WperfCountDataCooker : SourceDataCooker<WperfEvent, WperfSourceParser, string>
     {
         private readonly List<WperfEvent> wperfEvents;
 
+        /// <summary>
+        /// Data processed by the DataCooker needs to be stored in a field annotated with DataOutput
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// private readonly List<WperfEvent> wperfEvents;
+        /// [DataOutput]
+        /// public IReadOnlyList<WperfEvent> WperfEvents { get; }
+        /// </code>
+        /// </example>
         [DataOutput]
         public IReadOnlyList<WperfEvent> WperfEvents { get; }
 
@@ -56,6 +69,21 @@ namespace WPAPlugin.DataCookers
 
         public override string Description => "Passes on the counting data as is";
 
+        /// <summary>
+        /// WperfCountDataCooker filters the counting events from all the processed WperfEvents by the WperfSourceParser through the DataKeys field.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// public override ReadOnlyHashSet<string> DataKeys =>
+        ///    new ReadOnlyHashSet<string>(
+        ///        new HashSet<string>
+        ///        {
+        ///            WperfPluginConstants.PerformanceCounterEventKey,
+        ///            WperfPluginConstants.PerformanceCounterTimelineEventKey
+        ///        }
+        ///    );
+        /// </code>
+        /// </example>
         public override ReadOnlyHashSet<string> DataKeys =>
             new ReadOnlyHashSet<string>(
                 new HashSet<string>
@@ -65,6 +93,24 @@ namespace WPAPlugin.DataCookers
                 }
             );
 
+        /// <summary>
+        /// Data processing happens at the CookDataElement level that takes the data marked as ready to be processed from the SourceParser, as well as the WperfSourceParser instance to extract context if needed.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// public override DataProcessingResult CookDataElement(
+        ///    WperfEvent data,
+        ///    WperfSourceParser context,
+        ///    CancellationToken cancellationToken
+        ///)
+        ///{
+        ///    ... // process data and add to the field annotated with [DataOutput]
+        ///    wperfEvents.Add(cookedData);
+        ///
+        ///    return DataProcessingResult.Processed;
+        ///}
+        /// </code>
+        /// </example>
         public override DataProcessingResult CookDataElement(
             WperfEvent data,
             WperfSourceParser context,

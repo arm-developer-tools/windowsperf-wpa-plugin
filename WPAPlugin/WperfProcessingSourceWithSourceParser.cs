@@ -38,6 +38,9 @@ using WPAPlugin.Schemas;
 
 namespace WPAPlugin
 {
+    /// <summary>
+    /// WperfProcessingSourceWithSourceParser is the entrypoint of the plugin, responsible of setting up metadata, announcing the file types supported by the plugin and input file validation.
+    /// </summary>
     [ProcessingSource(
         "{05D8A372-EC56-43DE-83FF-02BDD9042727}",
         "WindowsPerf WPA Plugin",
@@ -48,6 +51,9 @@ namespace WPAPlugin
     {
         private IApplicationEnvironment applicationEnvironment;
 
+        /// <summary>
+        /// Sets project information
+        /// </summary>
         public override ProcessingSourceInfo GetAboutInfo()
         {
             return new ProcessingSourceInfo
@@ -57,7 +63,8 @@ namespace WPAPlugin
                 {
                     Name = "BSD 3-Clause License",
                     Text = "Please see the link for the full license text.",
-                    Uri = "https://github.com/arm-developer-tools/windowsperf-wpa-plugin/blob/main/LICENSE",
+                    Uri =
+                        "https://github.com/arm-developer-tools/windowsperf-wpa-plugin/blob/main/LICENSE",
                 },
                 Owners = new[]
                 {
@@ -121,6 +128,9 @@ namespace WPAPlugin
             return isValid;
         }
 
+        /// <summary>
+        /// Performs validation on the input file
+        /// </summary>
         protected override bool IsDataSourceSupportedCore(IDataSource source)
         {
             string sourcePath = source.Uri.LocalPath;

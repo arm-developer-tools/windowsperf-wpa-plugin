@@ -28,12 +28,12 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-using Microsoft.Performance.SDK;
-using Microsoft.Performance.SDK.Extensibility;
-using Microsoft.Performance.SDK.Processing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Performance.SDK;
+using Microsoft.Performance.SDK.Extensibility;
+using Microsoft.Performance.SDK.Processing;
 using WPAPlugin.Constants;
 using WPAPlugin.DataCookers;
 using WPAPlugin.Events;
@@ -41,10 +41,33 @@ using WPAPlugin.Utils;
 
 namespace WPAPlugin.Tables
 {
+    /// <summary>
+    /// WperfTimelineTableFromDataCooker is a WPA table that shows counting events from a wperf count timeline.
+    ///
+    /// This table's data is, by default, plotted in graphs that displays the count as a function
+    /// of time. As is the case with WperfCountingTableFromDataCooker, data is grouped by default
+    /// either by core or by event name.
+    ///
+    /// This table also provides a different graph per event group (specified in the event_note field of the count)
+    /// </summary>
     [Table]
     public static class WperfTimelineTableFromDataCooker
     {
-
+        /// <summary>
+        /// WperfTimelineTableFromDataCooker queries the output data of WperfTimelineDataCooker by specifying the cooker's path as a requiredDataCookers in the TableDescriptor.
+        /// </summary>
+        /// <example>
+        /// <code>
+        /// public static TableDescriptor TableDescriptor =>
+        ///     new TableDescriptor(
+        ///         Guid.NewGuid(),
+        ///         "Counting timeline",
+        ///         "Counting timeline parsed from wperf JSON output",
+        ///         requiredDataCookers: new List<DataCookerPath> { WperfPluginConstants.CookerPath },
+        ///         defaultLayout: TableLayoutStyle.Graph
+        ///     );
+        /// </code>
+        /// </example>
         public static TableDescriptor TableDescriptor =>
             new TableDescriptor(
                 Guid.NewGuid(),
@@ -53,63 +76,35 @@ namespace WPAPlugin.Tables
                 requiredDataCookers: new List<DataCookerPath> { WperfPluginConstants.CookerPath }
             );
 
-        public static void BuildCombinedTables(ITableBuilder tableBuilder, IReadOnlyList<WperfEventWithRelativeTimestamp> lineItems)
+        public static void BuildCombinedTables(
+            ITableBuilder tableBuilder,
+            IReadOnlyList<WperfEventWithRelativeTimestamp> lineItems
+        )
         {
             ColumnConfiguration CoreColumn = new ColumnConfiguration(
-               new ColumnMetadata(
-                   Guid.NewGuid(),
-                   "Core",
-                   "Core Number"
-               )
-           );
+                new ColumnMetadata(Guid.NewGuid(), "Core", "Core Number")
+            );
             ColumnConfiguration ValueColumn = new ColumnConfiguration(
-               new ColumnMetadata(
-                   Guid.NewGuid(),
-                   "Value",
-                   "Value Number"
-               ),
-               new UIHints { AggregationMode = AggregationMode.Sum }
-           );
+                new ColumnMetadata(Guid.NewGuid(), "Value", "Value Number"),
+                new UIHints { AggregationMode = AggregationMode.Sum }
+            );
 
             ColumnConfiguration EventNameColumn = new ColumnConfiguration(
-               new ColumnMetadata(
-                   Guid.NewGuid(),
-                   "Name",
-                   "Event Name"
-               )
-           );
+                new ColumnMetadata(Guid.NewGuid(), "Name", "Event Name")
+            );
             ColumnConfiguration EventIndexColumn = new ColumnConfiguration(
-               new ColumnMetadata(
-                   Guid.NewGuid(),
-                   "Index",
-                   "Event Index"
-               )
-           );
+                new ColumnMetadata(Guid.NewGuid(), "Index", "Event Index")
+            );
             ColumnConfiguration EventNoteColumn = new ColumnConfiguration(
-               new ColumnMetadata(
-                   Guid.NewGuid(),
-                   "Note",
-                   "Event Note"
-               )
-           );
-            ColumnConfiguration RelativeStartTimestampColumn =
-               new ColumnConfiguration(
-                   new ColumnMetadata(
-                       Guid.NewGuid(),
-                       "Start",
-                       "Start Time"
-                   )
-               );
+                new ColumnMetadata(Guid.NewGuid(), "Note", "Event Note")
+            );
+            ColumnConfiguration RelativeStartTimestampColumn = new ColumnConfiguration(
+                new ColumnMetadata(Guid.NewGuid(), "Start", "Start Time")
+            );
 
-            ColumnConfiguration RelativeEndTimestampColumn =
-               new ColumnConfiguration(
-                   new ColumnMetadata(
-                       Guid.NewGuid(),
-                       "End",
-                       "End Time"
-                   )
-               );
-
+            ColumnConfiguration RelativeEndTimestampColumn = new ColumnConfiguration(
+                new ColumnMetadata(Guid.NewGuid(), "End", "End Time")
+            );
 
             IProjection<int, WperfEventWithRelativeTimestamp> baseProjection = Projection.Index(
                 lineItems
@@ -119,11 +114,11 @@ namespace WPAPlugin.Tables
             IProjection<int, double> valueProjection = baseProjection.Compose(el => el.Value);
             IProjection<int, string> indexProjection = baseProjection.Compose(el => el.Index);
             IProjection<int, string> noteProjection = baseProjection.Compose(el => el.Note);
-            IProjection<int, Timestamp> relativeStartTimeProjection = baseProjection.Compose(
-                el => el.RelativeStartTimestamp
+            IProjection<int, Timestamp> relativeStartTimeProjection = baseProjection.Compose(el =>
+                el.RelativeStartTimestamp
             );
-            IProjection<int, Timestamp> relativeEndTimeProjection = baseProjection.Compose(
-                el => el.RelativeEndTimestamp
+            IProjection<int, Timestamp> relativeEndTimeProjection = baseProjection.Compose(el =>
+                el.RelativeEndTimestamp
             );
 
             TableConfiguration groupByCoreConfig = new TableConfiguration("Group by core")
@@ -174,14 +169,14 @@ namespace WPAPlugin.Tables
                 .AddColumn(EventNoteColumn, noteProjection)
                 .AddColumn(RelativeStartTimestampColumn, relativeStartTimeProjection)
                 .AddColumn(RelativeEndTimestampColumn, relativeEndTimeProjection);
-
-
         }
 
-
-        public static void BuildGroupTable(string group, ITableBuilder tableBuilder, IReadOnlyList<WperfEventWithRelativeTimestamp> lineItems)
+        public static void BuildGroupTable(
+            string group,
+            ITableBuilder tableBuilder,
+            IReadOnlyList<WperfEventWithRelativeTimestamp> lineItems
+        )
         {
-
             var filteredLineItems = lineItems.Where(x => x.Note == group).ToList();
 
             if (filteredLineItems.Count == 0)
@@ -189,7 +184,8 @@ namespace WPAPlugin.Tables
                 return;
             }
 
-            List<WperfEventWithRelativeTimestamp> filledList = new List<WperfEventWithRelativeTimestamp>();
+            List<WperfEventWithRelativeTimestamp> filledList =
+                new List<WperfEventWithRelativeTimestamp>();
 
             for (int i = 0; i < lineItems.Count; ++i)
             {
@@ -199,68 +195,62 @@ namespace WPAPlugin.Tables
                 }
                 else
                 {
-                    filledList.Add(new WperfEventWithRelativeTimestamp()
-                    {
-                        Name = "#PLACEHOLDER"
-                    });
+                    filledList.Add(new WperfEventWithRelativeTimestamp() { Name = "#PLACEHOLDER" });
                 }
             }
 
             ColumnConfiguration CoreColumn = new ColumnConfiguration(
-               new ColumnMetadata(
-                   Guid.NewGuid(),
+                new ColumnMetadata(
+                    Guid.NewGuid(),
                     Helpers.GenerateColumnName(group, "Core"),
-                   "Core Number"
-               )
-           );
+                    "Core Number"
+                )
+            );
             ColumnConfiguration ValueColumn = new ColumnConfiguration(
-               new ColumnMetadata(
-                   Guid.NewGuid(),
+                new ColumnMetadata(
+                    Guid.NewGuid(),
                     Helpers.GenerateColumnName(group, "Value"),
-                   "Value Number"
-               ),
-               new UIHints { AggregationMode = AggregationMode.Sum }
-           );
+                    "Value Number"
+                ),
+                new UIHints { AggregationMode = AggregationMode.Sum }
+            );
 
             ColumnConfiguration EventNameColumn = new ColumnConfiguration(
-               new ColumnMetadata(
-                   Guid.NewGuid(),
-                   Helpers.GenerateColumnName(group, "Name"),
-                   "Event Name"
-               )
-           );
+                new ColumnMetadata(
+                    Guid.NewGuid(),
+                    Helpers.GenerateColumnName(group, "Name"),
+                    "Event Name"
+                )
+            );
             ColumnConfiguration EventIndexColumn = new ColumnConfiguration(
-               new ColumnMetadata(
-                   Guid.NewGuid(),
-                   Helpers.GenerateColumnName(group, "Index"),
-                   "Event Index"
-               )
-           );
+                new ColumnMetadata(
+                    Guid.NewGuid(),
+                    Helpers.GenerateColumnName(group, "Index"),
+                    "Event Index"
+                )
+            );
             ColumnConfiguration EventNoteColumn = new ColumnConfiguration(
-               new ColumnMetadata(
-                   Guid.NewGuid(),
-                   Helpers.GenerateColumnName(group, "Note"),
-                   "Event Note"
-               )
-           );
-            ColumnConfiguration RelativeStartTimestampColumn =
-               new ColumnConfiguration(
-                   new ColumnMetadata(
-                       Guid.NewGuid(),
-                       Helpers.GenerateColumnName(group, "Start"),
-                       "Start Time"
-                   )
-               );
+                new ColumnMetadata(
+                    Guid.NewGuid(),
+                    Helpers.GenerateColumnName(group, "Note"),
+                    "Event Note"
+                )
+            );
+            ColumnConfiguration RelativeStartTimestampColumn = new ColumnConfiguration(
+                new ColumnMetadata(
+                    Guid.NewGuid(),
+                    Helpers.GenerateColumnName(group, "Start"),
+                    "Start Time"
+                )
+            );
 
-            ColumnConfiguration RelativeEndTimestampColumn =
-               new ColumnConfiguration(
-                   new ColumnMetadata(
-                       Guid.NewGuid(),
-                       Helpers.GenerateColumnName(group, "End"),
-                       "End Time"
-                   )
-               );
-
+            ColumnConfiguration RelativeEndTimestampColumn = new ColumnConfiguration(
+                new ColumnMetadata(
+                    Guid.NewGuid(),
+                    Helpers.GenerateColumnName(group, "End"),
+                    "End Time"
+                )
+            );
 
             IProjection<int, WperfEventWithRelativeTimestamp> baseProjection = Projection.Index(
                 filledList
@@ -270,13 +260,12 @@ namespace WPAPlugin.Tables
             IProjection<int, double> valueProjection = baseProjection.Compose(el => el.Value);
             IProjection<int, string> indexProjection = baseProjection.Compose(el => el.Index);
             IProjection<int, string> noteProjection = baseProjection.Compose(el => el.Note);
-            IProjection<int, Timestamp> relativeStartTimeProjection = baseProjection.Compose(
-                el => el.RelativeStartTimestamp
+            IProjection<int, Timestamp> relativeStartTimeProjection = baseProjection.Compose(el =>
+                el.RelativeStartTimestamp
             );
-            IProjection<int, Timestamp> relativeEndTimeProjection = baseProjection.Compose(
-                el => el.RelativeEndTimestamp
+            IProjection<int, Timestamp> relativeEndTimeProjection = baseProjection.Compose(el =>
+                el.RelativeEndTimestamp
             );
-
 
             TableConfiguration groupByEventConfig = new TableConfiguration(group)
             {
@@ -309,7 +298,6 @@ namespace WPAPlugin.Tables
                 .AddColumn(EventNoteColumn, noteProjection)
                 .AddColumn(RelativeStartTimestampColumn, relativeStartTimeProjection)
                 .AddColumn(RelativeEndTimestampColumn, relativeEndTimeProjection);
-
         }
 
         public static void BuildTable(ITableBuilder tableBuilder, IDataExtensionRetrieval tableData)
@@ -322,7 +310,6 @@ namespace WPAPlugin.Tables
                     nameof(WperfTimelineDataCooker.WperfEventWithRelativeTimestamps)
                 )
             );
-
 
             var groupList = lineItems.Select(el => el.Note).Distinct().ToList();
 

@@ -32,24 +32,68 @@ using Microsoft.Performance.SDK.Extensibility;
 
 namespace WPAPlugin.Events
 {
+    /// <summary>
+    /// WperfEvent is a class that stores WindowsPerf events.
+    /// In order to keep the plugin structure straight forward and not resorting to multiple
+    /// SourceParsers, counting events and timeline events are stored in WperfEvent instances
+    /// by sharing their common properties and ignoring unrelated fields.
+    /// </summary>
     public class WperfEvent : IKeyedDataType<string>
     {
         // Common fields
+
+        /// <summary>
+        /// int representing the core number of said event.
+        /// </summary>
         public int CoreNumber { get; set; }
+
+        /// <summary>
+        /// double represeting the value of the count/telemetry.
+        /// </summary>
         public double Value { get; set; }
+
+        /// <summary>
+        /// string representing name of the event/metric.
+        /// </summary>
         public string Name { get; set; }
+
+        /// <summary>
+        /// double representing the start time of the event.
+        /// </summary>
         public double StartTime { get; set; }
+
+        /// <summary>
+        /// double representing the end time of the event.
+        /// </summary>
         public double EndTime { get; set; }
+
+        /// <summary>
+        /// string used in filtering the events by the DataCookers.
+        /// </summary>
         public string Key { get; set; }
 
         // Counting fields
+        /// <summary>
+        /// string representing the counting event index.
+        /// </summary>
         public string Index { get; set; }
+
+        /// <summary>
+        /// string representing the counting event note.
+        /// </summary>
         public string Note { get; set; }
 
         // Telemetry Fields
-        public string Unit { get; set; }
-        public string ProductName { get; set; }
 
+        /// <summary>
+        /// string representing the metric unit.
+        /// </summary>
+        public string Unit { get; set; }
+
+        /// <summary>
+        /// string representing the metric product name.
+        /// </summary>
+        public string ProductName { get; set; }
 
         public WperfEvent() { }
 
