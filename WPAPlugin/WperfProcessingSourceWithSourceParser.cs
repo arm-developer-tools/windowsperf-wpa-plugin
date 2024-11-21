@@ -31,7 +31,6 @@
 
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Microsoft.Performance.SDK.Processing;
 using NJsonSchema;
 using WPAPlugin.Schemas;
@@ -50,6 +49,9 @@ namespace WPAPlugin
     public class WperfProcessingSourceWithSourceParser : ProcessingSource
     {
         private IApplicationEnvironment applicationEnvironment;
+
+        public WperfProcessingSourceWithSourceParser()
+            : base() { }
 
         /// <summary>
         /// Sets project information
@@ -92,13 +94,8 @@ namespace WPAPlugin
             ProcessorOptions options
         )
         {
-            WperfSourceParser parser = new WperfSourceParser(
-                timelinePathList.ToArray(),
-                countingPathList.ToArray()
-            );
+            WperfSourceParser parser = new WperfSourceParser(timelinePathList, countingPathList);
 
-            timelinePathList.Clear();
-            countingPathList.Clear();
             validationCache.Clear();
             return new WperfCustomDataProcessorWithSourceParser(
                 parser,
