@@ -47,15 +47,18 @@ namespace WPAPlugin
     /// </summary>
     public class WperfSourceParser : ISourceParser<WperfEvent, WperfSourceParser, string>
     {
-        private readonly string[] timelineFilesPathList;
-        private readonly string[] countFilesPathList;
+        private readonly HashSet<string> timelineFilesPathList;
+        private readonly HashSet<string> countFilesPathList;
 
         /// <summary>
         /// Timeline and count files paths lists need to be passed seperately to the <c>constructor</c>
         /// </summary>
         /// <param name="timelineFilesPathList">List of timeline file paths</param>
         /// <param name="countFilesPathList">List of single count file paths</param>
-        public WperfSourceParser(string[] timelineFilesPathList, string[] countFilesPathList)
+        public WperfSourceParser(
+            HashSet<string> timelineFilesPathList,
+            HashSet<string> countFilesPathList
+        )
         {
             this.timelineFilesPathList = timelineFilesPathList;
             this.countFilesPathList = countFilesPathList;
@@ -96,7 +99,7 @@ namespace WPAPlugin
             CancellationToken cancellationToken
         )
         {
-            int filesCount = timelineFilesPathList.Length;
+            int filesCount = timelineFilesPathList.Count;
             if (filesCount == 0)
             {
                 return;
@@ -211,7 +214,7 @@ namespace WPAPlugin
             CancellationToken cancellationToken
         )
         {
-            int filesCount = countFilesPathList.Length;
+            int filesCount = countFilesPathList.Count;
             if (filesCount == 0)
             {
                 return;
@@ -312,6 +315,8 @@ namespace WPAPlugin
         {
             ProcessTimelineFiles(dataProcessor, cancellationToken);
             ProcessCountFiles(dataProcessor, cancellationToken);
+            this.timelineFilesPathList.Clear();
+            this.countFilesPathList.Clear();
         }
     }
 }

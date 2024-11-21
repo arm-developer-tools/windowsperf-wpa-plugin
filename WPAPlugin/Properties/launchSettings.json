@@ -3,12 +3,12 @@
     "Debug": {
       "commandName": "Executable",
       "executablePath": "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\wpa.exe",
-      "commandLineArgs": "-nodefault -addsearchdir \"%USERPROFILE%\\devProjects\\wpa-plugin\\WPAPlugin\\bin\\Debug\\netstandard2.0\""
+      "commandLineArgs": "-nodefault -addsearchdir \"%USERPROFILE%\\devProjects\\windowsperf-wpa-plugin\\WPAPlugin\\bin\\Debug\\netstandard2.0\""
     },
     "Release": {
       "commandName": "Executable",
       "executablePath": "C:\\Program Files (x86)\\Windows Kits\\10\\Windows Performance Toolkit\\wpa.exe",
-      "commandLineArgs": "-nodefault -addsearchdir \"%USERPROFILE%\\devProjects\\wpa-plugin\\WPAPlugin\\bin\\Release\\netstandard2.0\""
+      "commandLineArgs": "-nodefault -addsearchdir \"%USERPROFILE%\\devProjects\\windowsperf-wpa-plugin\\WPAPlugin\\bin\\Release\\netstandard2.0\""
     }
   }
 }
