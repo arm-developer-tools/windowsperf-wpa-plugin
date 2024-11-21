@@ -96,15 +96,13 @@ namespace WPAPlugin
         {
             WperfSourceParser parser = new WperfSourceParser(timelinePathList, countingPathList);
 
-            var _cachedProcessor = new WperfCustomDataProcessorWithSourceParser(
+            validationCache.Clear();
+            return new WperfCustomDataProcessorWithSourceParser(
                 parser,
                 options,
                 applicationEnvironment,
                 processorEnvironment
             );
-
-            validationCache.Clear();
-            return _cachedProcessor;
         }
 
         private static Dictionary<(string, string), bool> validationCache =
